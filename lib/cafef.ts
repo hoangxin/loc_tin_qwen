@@ -170,11 +170,14 @@ async function crawlCategory(url: string, category: string, cutoff: number): Pro
   return items;
 }
 
-export async function fetchCafeFNews(hours = 24): Promise<NewsItem[]> {
+export async function fetchCafeFNews(hours = 24, categories?: string[]): Promise<NewsItem[]> {
   const cutoff = Date.now() - hours * 60 * 60 * 1000;
+  const sources = categories?.length
+    ? CATEGORY_SOURCES.filter((source) => categories.includes(source.category))
+    : CATEGORY_SOURCES;
 
   const results = await Promise.allSettled(
-    CATEGORY_SOURCES.map(({ url, category }) => crawlCategory(url, category, cutoff))
+    sources.map(({ url, category }) => crawlCategory(url, category, cutoff))
   );
 
   const items = results.flatMap((result) => {

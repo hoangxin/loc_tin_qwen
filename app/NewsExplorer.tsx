@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Digest } from '@/lib/digest';
 import type { DigestGroup } from '@/lib/qwen';
 import { formatTimestamp } from '@/lib/format';
+import TriggerDigestButton from './TriggerDigestButton';
 
 // Fixed so both tabs always render even when one source has no data yet
 // (e.g. its crawl failed on the last run) - a source silently disappearing
@@ -72,16 +73,23 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
 
   return (
     <div>
-      <div className="source-tabs">
-        {sources.map(({ source }) => (
-          <button
-            key={source}
-            className={source === currentSource.source ? 'source-tab active' : 'source-tab'}
-            onClick={() => selectSource(source)}
-          >
-            {source}
-          </button>
-        ))}
+      <div className="source-tabs-row">
+        <div className="source-tabs">
+          {sources.map(({ source }) => (
+            <button
+              key={source}
+              className={source === currentSource.source ? 'source-tab active' : 'source-tab'}
+              onClick={() => selectSource(source)}
+            >
+              {source}
+            </button>
+          ))}
+        </div>
+
+        <TriggerDigestButton
+          source={currentSource.source}
+          categories={CATEGORY_ORDER[currentSource.source] ?? currentSource.categories.map((group) => group.category)}
+        />
       </div>
 
       {currentSource.categories.length === 0 ? (

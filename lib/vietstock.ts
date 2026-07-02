@@ -250,9 +250,12 @@ export async function crawlCategory(
   }
 }
 
-export async function fetchVietstockNews(hours = 24): Promise<NewsItem[]> {
+export async function fetchVietstockNews(hours = 24, categories?: string[]): Promise<NewsItem[]> {
   const now = new Date();
   const cutoff = now.getTime() - hours * 60 * 60 * 1000;
+  const sources = categories?.length
+    ? CATEGORY_SOURCES.filter((source) => categories.includes(source.category))
+    : CATEGORY_SOURCES;
 
   let browser: Browser | null = null;
   try {
@@ -261,7 +264,7 @@ export async function fetchVietstockNews(hours = 24): Promise<NewsItem[]> {
     // sparticuz/chromium runs with --single-process, which cannot reliably
     // host multiple concurrent pages/tabs — crawl categories one at a time.
     const allItems: NewsItem[] = [];
-    for (const { url, category } of CATEGORY_SOURCES) {
+    for (const { url, category } of sources) {
       try {
         const items = await crawlCategory(browser, url, category, cutoff, now);
         allItems.push(...items);

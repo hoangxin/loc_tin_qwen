@@ -8,6 +8,16 @@ on:
         required: false
         default: '24'
         type: string
+      source:
+        description: 'Nguồn tin: CafeF, Vietstock, hoặc để trống = cả 2'
+        required: false
+        default: ''
+        type: string
+      categories:
+        description: 'Danh sách mục (cách nhau bởi dấu phẩy), để trống = tất cả mục của nguồn'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -34,6 +44,8 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           DIGEST_HOURS: ${{ github.event.inputs.hours || '24' }}
+          DIGEST_SOURCE: ${{ github.event.inputs.source }}
+          DIGEST_CATEGORIES: ${{ github.event.inputs.categories }}
         run: npx tsx scripts/run-digest.ts
 
       # Commits data/latest-digest.json if it changed - this push is what

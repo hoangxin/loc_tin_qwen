@@ -9,10 +9,17 @@ export interface Digest {
   groups: DigestGroup[];
 }
 
-export async function buildDigest(hours = 24): Promise<Digest> {
+// `source` scopes the run to a single tab's "Tổng hợp" button (e.g. only
+// re-crawl CafeF); omitted, it fetches both like the old full daily run.
+// `categories` further narrows within that source - ignored when `source`
+// isn't set, since there's no single category list to filter against.
+export async function buildDigest(hours = 24, source?: string, categories?: string[]): Promise<Digest> {
+  const wantsCafeF = !source || source === 'CafeF';
+  const wantsVietstock = !source || source === 'Vietstock';
+
   const [cafeF, vietstock] = await Promise.all([
-    fetchCafeFNews(hours),
-    fetchVietstockNews(hours),
+    wantsCafeF ? fetchCafeFNews(hours, source === 'CafeF' ? categories : undefined) : Promise.resolve([]),
+    wantsVietstock ? fetchVietstockNews(hours, source === 'Vietstock' ? categories : undefined) : Promise.resolve([]),
   ]);
 
   const allNews = [...cafeF, ...vietstock]
