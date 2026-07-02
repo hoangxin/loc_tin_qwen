@@ -66,6 +66,17 @@ export async function launchBrowser(): Promise<Browser> {
   });
 }
 
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+// Vietstock's "DD/MM HH:mm" / "DD/MM/YYYY HH:mm" timestamps are Vietnam
+// wall-clock time. Building a Date from those Y/M/D/H/m fields with the local
+// Date constructor would interpret them in the *runtime's* timezone - UTC on
+// Vercel/GitHub Actions - silently shifting every timestamp by 7 hours. This
+// builds the equivalent UTC instant directly instead.
+function vnWallClockToDate(year: number, month: number, day: number, hour: number, minute: number): Date {
+  return new Date(Date.UTC(year, month - 1, day, hour, minute) - VN_OFFSET_MS);
+}
+
 // Vietstock renders "X phút/giờ trước" for recent items and "DD/MM HH:mm"
 // (year implied) for older ones on the same channel page.
 function parsePublishedAt(timeText: string, now: Date): Date | null {
@@ -78,12 +89,17 @@ function parsePublishedAt(timeText: string, now: Date): Date | null {
     return new Date(now.getTime() - amount * unitMs);
   }
 
+  // `now` shifted into Vietnam wall-clock terms, to fill in the year the
+  // short format omits.
+  const nowVN = new Date(now.getTime() + VN_OFFSET_MS);
+
   const shortMatch = text.match(/^(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})$/);
   if (shortMatch) {
     const [, day, month, hour, minute] = shortMatch;
-    const candidate = new Date(now.getFullYear(), Number(month) - 1, Number(day), Number(hour), Number(minute));
+    const year = nowVN.getUTCFullYear();
+    let candidate = vnWallClockToDate(year, Number(month), Number(day), Number(hour), Number(minute));
     if (candidate.getTime() > now.getTime() + 60_000) {
-      candidate.setFullYear(candidate.getFullYear() - 1);
+      candidate = vnWallClockToDate(year - 1, Number(month), Number(day), Number(hour), Number(minute));
     }
     return candidate;
   }
@@ -91,7 +107,7 @@ function parsePublishedAt(timeText: string, now: Date): Date | null {
   const fullMatch = text.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
   if (fullMatch) {
     const [, day, month, year, hour, minute] = fullMatch;
-    return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+    return vnWallClockToDate(Number(year), Number(month), Number(day), Number(hour), Number(minute));
   }
 
   return null;
@@ -199,20 +215,33 @@ export async function crawlCategory(
 
       if (reachedCutoff) break;
 
-      const nextButton = await page.$(NEXT_PAGE_SELECTOR);
-      if (!nextButton) break;
+      const hasNextButton = await page.$eval(NEXT_PAGE_SELECTOR, () => true).catch(() => false);
+      if (!hasNextButton) break;
 
+      // Puppeteer's native ElementHandle.click() (visibility/position checks,
+      // then a synthesized mouse event) hangs on this element - confirmed by
+      // hand against the live site. A plain in-page el.click() works
+      // reliably, so dispatch it via evaluate instead.
       const firstTitleBefore = rawArticles[0]?.title;
-      await nextButton.click();
-      await page.waitForFunction(
-        (selector, prevTitle) => {
-          const el = document.querySelector(selector)?.querySelector('h4 a.fontbold');
-          return Boolean(el) && el?.textContent?.trim() !== prevTitle;
-        },
-        {},
-        ARTICLE_SELECTOR,
-        firstTitleBefore
-      );
+      try {
+        await page.evaluate((selector) => {
+          (document.querySelector(selector) as HTMLElement | null)?.click();
+        }, NEXT_PAGE_SELECTOR);
+        await page.waitForFunction(
+          (selector, prevTitle) => {
+            const el = document.querySelector(selector)?.querySelector('h4 a.fontbold');
+            return Boolean(el) && el?.textContent?.trim() !== prevTitle;
+          },
+          {},
+          ARTICLE_SELECTOR,
+          firstTitleBefore
+        );
+      } catch (error) {
+        // Don't let a pagination hiccup on page N discard everything already
+        // collected from pages 1..N-1 - stop here and return what we have.
+        console.error('vietstock pagination error', category, pageIndex + 1, error);
+        break;
+      }
     }
 
     return items;
@@ -221,9 +250,9 @@ export async function crawlCategory(
   }
 }
 
-export async function fetchVietstockNews(): Promise<NewsItem[]> {
+export async function fetchVietstockNews(hours = 24): Promise<NewsItem[]> {
   const now = new Date();
-  const cutoff = now.getTime() - 24 * 60 * 60 * 1000;
+  const cutoff = now.getTime() - hours * 60 * 60 * 1000;
 
   let browser: Browser | null = null;
   try {

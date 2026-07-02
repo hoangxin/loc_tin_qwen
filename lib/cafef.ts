@@ -47,12 +47,15 @@ function normalizeLink(href: string): string {
   return `https://cafef.vn${href.startsWith('/') ? href : `/${href}`}`;
 }
 
-// Cafef renders an absolute "YYYY-MM-DDTHH:mm:00" timestamp (no timezone
-// suffix), which JS parses as local time - consistent with how `now` is
-// created below, so the cutoff comparison stays correct regardless of the
-// server's actual timezone.
+// Cafef renders an absolute "YYYY-MM-DDTHH:mm:00" timestamp in Vietnam time
+// but without a timezone suffix. Parsing that bare string would make JS
+// interpret it as the *runtime's* local time - UTC on Vercel/GitHub Actions -
+// silently shifting every timestamp by 7 hours. Append the explicit VN offset
+// so the string is unambiguous regardless of where this code runs.
 function parsePublishedAt(timeText: string): Date | null {
-  const date = new Date(timeText.trim());
+  const trimmed = timeText.trim();
+  const hasOffset = /(Z|[+-]\d{2}:?\d{2})$/.test(trimmed);
+  const date = new Date(hasOffset ? trimmed : `${trimmed}+07:00`);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
@@ -167,8 +170,8 @@ async function crawlCategory(url: string, category: string, cutoff: number): Pro
   return items;
 }
 
-export async function fetchCafeFNews(): Promise<NewsItem[]> {
-  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+export async function fetchCafeFNews(hours = 24): Promise<NewsItem[]> {
+  const cutoff = Date.now() - hours * 60 * 60 * 1000;
 
   const results = await Promise.allSettled(
     CATEGORY_SOURCES.map(({ url, category }) => crawlCategory(url, category, cutoff))
