@@ -87,8 +87,10 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
         </div>
 
         <TriggerDigestButton
+          key={currentSource.source}
           source={currentSource.source}
           categories={CATEGORY_ORDER[currentSource.source] ?? currentSource.categories.map((group) => group.category)}
+          currentGeneratedAt={digest.generatedAt}
         />
       </div>
 

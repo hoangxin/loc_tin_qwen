@@ -1,16 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-type Status = 'idle' | 'asking' | 'loading' | 'done' | 'error';
+type Status = 'idle' | 'asking' | 'loading' | 'waiting' | 'error';
 
 const DEFAULT_HOURS = 24;
+const POLL_INTERVAL_MS = 15000;
+// GitHub Actions job itself is capped at 15 minutes, plus time for the commit
+// to land and Vercel to build - stop polling well past that so a stuck run
+// doesn't leave the tab quietly fetching forever.
+const MAX_POLL_MS = 20 * 60 * 1000;
 
-export default function TriggerDigestButton({ source, categories }: { source: string; categories: string[] }) {
+export default function TriggerDigestButton({
+  source,
+  categories,
+  currentGeneratedAt,
+}: {
+  source: string;
+  categories: string[];
+  currentGeneratedAt: string;
+}) {
   const [status, setStatus] = useState<Status>('idle');
   const [hours, setHours] = useState(String(DEFAULT_HOURS));
   const [selected, setSelected] = useState<Set<string>>(new Set(categories));
   const [message, setMessage] = useState('');
+  const pollHandle = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollHandle.current) clearInterval(pollHandle.current);
+    };
+  }, []);
+
+  function stopPolling() {
+    if (pollHandle.current) {
+      clearInterval(pollHandle.current);
+      pollHandle.current = null;
+    }
+  }
+
+  function startPolling() {
+    const startedAt = Date.now();
+    pollHandle.current = setInterval(async () => {
+      if (Date.now() - startedAt > MAX_POLL_MS) {
+        stopPolling();
+        setMessage('Chạy lâu hơn dự kiến so với bình thường - bạn tự tải lại trang sau nhé.');
+        setStatus('error');
+        return;
+      }
+      try {
+        const response = await fetch('/api/digest-meta', { cache: 'no-store' });
+        const data = await response.json();
+        if (data?.generatedAt && data.generatedAt !== currentGeneratedAt) {
+          stopPolling();
+          window.location.reload();
+        }
+      } catch {
+        // transient fetch hiccup - keep polling, don't bail on one failed check
+      }
+    }, POLL_INTERVAL_MS);
+  }
 
   function openForm() {
     setSelected(new Set(categories));
@@ -56,9 +105,10 @@ export default function TriggerDigestButton({ source, categories }: { source: st
       }
 
       setMessage(
-        `Đã kích hoạt tổng hợp ${source} (${selected.size}/${categories.length} mục) trong ${data.hours}h gần nhất. Chờ khoảng vài phút rồi tải lại trang.`
+        `Đã kích hoạt tổng hợp ${source} (${selected.size}/${categories.length} mục) trong ${data.hours}h gần nhất. Trang sẽ tự tải lại khi xong.`
       );
-      setStatus('done');
+      setStatus('waiting');
+      startPolling();
     } catch {
       setMessage('Không kết nối được tới server.');
       setStatus('error');
@@ -121,8 +171,14 @@ export default function TriggerDigestButton({ source, categories }: { source: st
       <span className={status === 'error' ? 'trigger-message trigger-message-error' : 'trigger-message'}>
         {message}
       </span>
-      <button className="trigger-button trigger-button-secondary" onClick={() => setStatus('idle')}>
-        Đóng
+      <button
+        className="trigger-button trigger-button-secondary"
+        onClick={() => {
+          stopPolling();
+          setStatus('idle');
+        }}
+      >
+        {status === 'waiting' ? 'Huỷ chờ' : 'Đóng'}
       </button>
     </div>
   );
