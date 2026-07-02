@@ -53,10 +53,16 @@ function fallbackSummary(item: NewsItem): string {
   return item.description ? item.description.slice(0, 300) : item.title;
 }
 
-function buildPrompt(group: { source: string; category: string }, chunk: NewsItem[], chunkIndex: number, chunkCount: number): string {
+function buildPrompt(
+  group: { source: string; category: string },
+  chunk: NewsItem[],
+  chunkIndex: number,
+  chunkCount: number,
+  hours: number
+): string {
   return `Mày là trợ lý phân tích tài chính, hỗ trợ tao tổng hợp và tóm tắt thông tin. Tiêu chí tổng hợp tóm tắt tin cho tao như sau:
 
-- Đây là mục "${group.category}" của ${group.source}. Tóm tắt TẤT CẢ các tin dưới đây trong vòng 24h qua, theo trình tự thời gian (tin mới nhất trước), không tự categorize lại theo chủ đề.
+- Đây là mục "${group.category}" của ${group.source}. Tóm tắt TẤT CẢ các tin dưới đây trong vòng ${hours}h qua, theo trình tự thời gian (tin mới nhất trước), không tự categorize lại theo chủ đề.
 - Không được cắt bớt danh sách tin, không làm ví dụ mẫu, không chỉ chọn vài tin. Phải xử lý toàn bộ danh sách tin được cung cấp.
 - Mỗi tin tóm tắt nội dung chính trong vài câu, tóm tắt trực diện, xúc tích, đi thẳng vào các yếu tố chính (vd: bối cảnh, sự kiện, nguyên nhân, tác động, .v.v.).
 - Với các tin càng quan trọng (liên quan cổ phiếu/các thị trường, tin tài chính/kinh tế/vỹ mô nổi bật, sự kiện chính trị và tin tức thế giới nổi bật) thì tóm tắt càng chi tiết, tin ít quan trọng thì tóm tắt ngắn gọn (vd trong 1-3 câu).
@@ -120,10 +126,11 @@ async function summarizeChunk(
   group: { source: string; category: string },
   chunk: NewsItem[],
   chunkIndex: number,
-  chunkCount: number
+  chunkCount: number,
+  hours: number
 ): Promise<string[]> {
   try {
-    const raw = await callQwen(apiKey, buildPrompt(group, chunk, chunkIndex, chunkCount));
+    const raw = await callQwen(apiKey, buildPrompt(group, chunk, chunkIndex, chunkCount, hours));
     const parts = raw
       .split(ITEM_DELIMITER)
       .map((part) => part.trim())
@@ -150,14 +157,18 @@ function toDigestItem(item: NewsItem, summary: string): DigestItem {
   return { title: item.title, link: item.link, publishedAt: item.publishedAt, summary };
 }
 
-async function summarizeGroup(apiKey: string, group: { source: string; category: string; items: NewsItem[] }): Promise<DigestGroup> {
+async function summarizeGroup(
+  apiKey: string,
+  group: { source: string; category: string; items: NewsItem[] },
+  hours: number
+): Promise<DigestGroup> {
   const chunks: NewsItem[][] = [];
   for (let index = 0; index < group.items.length; index += CHUNK_SIZE) {
     chunks.push(group.items.slice(index, index + CHUNK_SIZE));
   }
 
   const chunkSummaries = await Promise.all(
-    chunks.map((chunk, chunkIndex) => summarizeChunk(apiKey, group, chunk, chunkIndex, chunks.length))
+    chunks.map((chunk, chunkIndex) => summarizeChunk(apiKey, group, chunk, chunkIndex, chunks.length, hours))
   );
   const summaries = chunkSummaries.flat();
 
@@ -168,7 +179,7 @@ async function summarizeGroup(apiKey: string, group: { source: string; category:
   };
 }
 
-export async function summarizeWithQwen(news: NewsItem[]): Promise<DigestGroup[]> {
+export async function summarizeWithQwen(news: NewsItem[], hours = 24): Promise<DigestGroup[]> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   const groups = groupByMuc(news);
 
@@ -180,7 +191,7 @@ export async function summarizeWithQwen(news: NewsItem[]): Promise<DigestGroup[]
     }));
   }
 
-  const results = await Promise.allSettled(groups.map((group) => summarizeGroup(apiKey, group)));
+  const results = await Promise.allSettled(groups.map((group) => summarizeGroup(apiKey, group, hours)));
 
   return results
     .map((result) => {

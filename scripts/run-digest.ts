@@ -3,8 +3,9 @@ import { join } from 'path';
 import { buildDigest } from '../lib/digest';
 
 const OUTPUT_PATH = join(__dirname, '..', 'data', 'latest-digest.json');
+const hours = Number(process.env.DIGEST_HOURS) || 24;
 
-buildDigest()
+buildDigest(hours)
   .then((digest) => {
     mkdirSync(join(__dirname, '..', 'data'), { recursive: true });
     writeFileSync(OUTPUT_PATH, JSON.stringify(digest, null, 2), 'utf-8');

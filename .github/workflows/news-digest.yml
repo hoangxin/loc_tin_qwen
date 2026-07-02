@@ -1,10 +1,13 @@
 name: News Digest
 
 on:
-  schedule:
-    # 08:30 UTC = 15:30 Asia/Ho_Chi_Minh
-    - cron: '30 8 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: 'Tổng hợp tin trong bao nhiêu giờ gần nhất'
+        required: false
+        default: '24'
+        type: string
 
 permissions:
   contents: write
@@ -30,6 +33,7 @@ jobs:
           PUPPETEER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          DIGEST_HOURS: ${{ github.event.inputs.hours || '24' }}
         run: npx tsx scripts/run-digest.ts
 
       # Commits data/latest-digest.json if it changed - this push is what

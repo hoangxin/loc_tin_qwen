@@ -9,10 +9,10 @@ export interface Digest {
   groups: DigestGroup[];
 }
 
-export async function buildDigest(): Promise<Digest> {
+export async function buildDigest(hours = 24): Promise<Digest> {
   const [cafeF, vietstock] = await Promise.all([
-    fetchCafeFNews(),
-    fetchVietstockNews(),
+    fetchCafeFNews(hours),
+    fetchVietstockNews(hours),
   ]);
 
   const allNews = [...cafeF, ...vietstock]
@@ -25,7 +25,7 @@ export async function buildDigest(): Promise<Digest> {
     }))
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-  const groups = allNews.length ? await summarizeWithQwen(allNews) : [];
+  const groups = allNews.length ? await summarizeWithQwen(allNews, hours) : [];
 
   return { generatedAt: new Date().toISOString(), count: allNews.length, groups };
 }

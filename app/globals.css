@@ -42,9 +42,71 @@ body {
   letter-spacing: -0.02em;
 }
 
+.site-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .site-header .updated-at {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.trigger-button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--text);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #000, 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.trigger-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 #000, 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.trigger-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.trigger-button-secondary {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 2px 0 var(--border), 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.trigger-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.trigger-form input[type='number'] {
+  width: 56px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.trigger-message {
+  max-width: 320px;
+}
+
+.trigger-message-error {
+  color: var(--accent);
 }
 
 .empty-state {
