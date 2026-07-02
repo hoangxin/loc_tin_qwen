@@ -15,6 +15,10 @@ export interface DigestItem {
   link: string;
   publishedAt: string;
   summary: string;
+  // True when Qwen failed (even after retry) or no API key was configured,
+  // so `summary` is the raw fallbackSummary rather than a real AI summary -
+  // the site surfaces this so a silent degrade doesn't look like a real digest.
+  usedFallback: boolean;
 }
 
 export interface DigestGroup {
@@ -117,18 +121,24 @@ async function callQwen(apiKey: string, prompt: string): Promise<string> {
   return text;
 }
 
-// Returns exactly `chunk.length` summaries, aligned 1:1 with `chunk`. Falls
-// back to a non-AI summary for the whole chunk if Qwen's response can't be
-// split into the expected number of parts - safer than risking a misaligned
-// summary getting attributed to the wrong article.
-async function summarizeChunk(
+const RETRY_DELAY_MS = 1500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// One retry after a transient error (rate limit, timeout, occasional
+// mismatched delimiter count) before giving up on this chunk - Promise.all
+// fires every chunk/group at once, so a single dropped request shouldn't
+// permanently demote a whole mục to the non-AI fallback.
+async function summarizeChunkOnce(
   apiKey: string,
   group: { source: string; category: string },
   chunk: NewsItem[],
   chunkIndex: number,
   chunkCount: number,
   hours: number
-): Promise<string[]> {
+): Promise<string[] | null> {
   try {
     const raw = await callQwen(apiKey, buildPrompt(group, chunk, chunkIndex, chunkCount, hours));
     const parts = raw
@@ -143,18 +153,42 @@ async function summarizeChunk(
         expected: chunk.length,
         got: parts.length,
       });
-      return chunk.map(fallbackSummary);
+      return null;
     }
 
     return parts;
   } catch (error) {
     console.error('qwen chunk error', group.source, group.category, error);
-    return chunk.map(fallbackSummary);
+    return null;
   }
 }
 
-function toDigestItem(item: NewsItem, summary: string): DigestItem {
-  return { title: item.title, link: item.link, publishedAt: item.publishedAt, summary };
+// Returns exactly `chunk.length` summaries, aligned 1:1 with `chunk`. Falls
+// back to a non-AI summary for the whole chunk if Qwen's response still
+// can't be split into the expected number of parts after a retry - safer
+// than risking a misaligned summary getting attributed to the wrong article.
+async function summarizeChunk(
+  apiKey: string,
+  group: { source: string; category: string },
+  chunk: NewsItem[],
+  chunkIndex: number,
+  chunkCount: number,
+  hours: number
+): Promise<{ summaries: string[]; usedFallback: boolean }> {
+  const first = await summarizeChunkOnce(apiKey, group, chunk, chunkIndex, chunkCount, hours);
+  if (first) return { summaries: first, usedFallback: false };
+
+  await sleep(RETRY_DELAY_MS);
+
+  const retry = await summarizeChunkOnce(apiKey, group, chunk, chunkIndex, chunkCount, hours);
+  if (retry) return { summaries: retry, usedFallback: false };
+
+  console.error('qwen chunk failed after retry, using fallback', group.source, group.category);
+  return { summaries: chunk.map(fallbackSummary), usedFallback: true };
+}
+
+function toDigestItem(item: NewsItem, summary: string, usedFallback: boolean): DigestItem {
+  return { title: item.title, link: item.link, publishedAt: item.publishedAt, summary, usedFallback };
 }
 
 async function summarizeGroup(
@@ -167,15 +201,16 @@ async function summarizeGroup(
     chunks.push(group.items.slice(index, index + CHUNK_SIZE));
   }
 
-  const chunkSummaries = await Promise.all(
+  const chunkResults = await Promise.all(
     chunks.map((chunk, chunkIndex) => summarizeChunk(apiKey, group, chunk, chunkIndex, chunks.length, hours))
   );
-  const summaries = chunkSummaries.flat();
+  const summaries = chunkResults.flatMap((result) => result.summaries);
+  const fallbackFlags = chunkResults.flatMap((result, chunkIndex) => chunks[chunkIndex].map(() => result.usedFallback));
 
   return {
     source: group.source,
     category: group.category,
-    items: group.items.map((item, index) => toDigestItem(item, summaries[index])),
+    items: group.items.map((item, index) => toDigestItem(item, summaries[index], fallbackFlags[index])),
   };
 }
 
@@ -187,7 +222,7 @@ export async function summarizeWithQwen(news: NewsItem[], hours = 24): Promise<D
     return groups.map((group) => ({
       source: group.source,
       category: group.category,
-      items: group.items.map((item) => toDigestItem(item, fallbackSummary(item))),
+      items: group.items.map((item) => toDigestItem(item, fallbackSummary(item), true)),
     }));
   }
 

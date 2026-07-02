@@ -115,6 +115,9 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
             {currentCategory.items.map((item) => (
               <article className="news-card" key={item.link}>
                 <span className="timestamp">{formatTimestamp(item.publishedAt)}</span>
+                {item.usedFallback && (
+                  <span className="fallback-note">⚠ Tóm tắt tự động (Qwen lỗi, chưa qua AI)</span>
+                )}
                 <h4>
                   <a href={item.link} target="_blank" rel="noreferrer">
                     {item.title}

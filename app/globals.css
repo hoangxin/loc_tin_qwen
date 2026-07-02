@@ -305,6 +305,17 @@ body {
   color: #333;
 }
 
+.news-card .fallback-note {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin-bottom: 8px;
+}
+
 .news-card .read-more {
   font-size: 13px;
   font-weight: 600;
