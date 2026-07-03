@@ -4,7 +4,11 @@ import type { NewsItem } from '@/lib/cafef';
 // summaries are much longer than a title-only pass - a big chunk risks the
 // response hitting the token limit and getting silently cut off mid-list.
 const CHUNK_SIZE = 15;
-const MAX_TOKENS = 8192;
+// qwen-plus on OpenRouter allows up to 32768 completion tokens - content-dense
+// mục (Tài chính ngân hàng, Doanh nghiệp) routinely need detailed summaries
+// that blew past the old 8192 cap, truncating mid-list every single retry
+// (temperature 0 means retries reproduce the same over-length response).
+const MAX_TOKENS = 24576;
 // Qwen is asked to return only the summary prose for each item, split by
 // this marker - the website renders title/timestamp/link itself from the
 // original NewsItem fields instead of trusting the model to format them.
