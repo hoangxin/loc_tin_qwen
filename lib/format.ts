@@ -16,12 +16,12 @@ export function formatTimestamp(iso: string): string {
 }
 
 // The summarization prompt tags PR/native-ads items by prefixing the summary
-// with "(PR/native ads)" - pull that prefix out so the UI can show it next
+// with "(PR/Native Ads)" - pull that prefix out so the UI can show it next
 // to the title instead of buried at the start of the summary paragraph.
 const PR_TAG_PATTERN = /^\(\s*PR\s*\/\s*native\s*ads\s*\)[:.,]?\s*/i;
 
 export function splitPrTag(summary: string): { prTag: string | null; summary: string } {
   const match = summary.match(PR_TAG_PATTERN);
   if (!match) return { prTag: null, summary };
-  return { prTag: '(PR/native ads)', summary: summary.slice(match[0].length) };
+  return { prTag: '(PR/Native Ads)', summary: summary.slice(match[0].length) };
 }

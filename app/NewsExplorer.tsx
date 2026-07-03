@@ -32,11 +32,11 @@ const CATEGORY_ORDER: Record<string, string[]> = {
     'Khoa học công nghệ',
     'Bất động sản',
     'Giải trí',
+    'Đời sống',
     'Pháp luật',
     'Du lịch',
     'Sức khỏe',
     'Thể thao',
-    'Đời sống',
   ],
 };
 
