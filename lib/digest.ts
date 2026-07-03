@@ -23,7 +23,7 @@ function isCrimeBlotterNews(item: NewsItem): boolean {
 
 // VnExpress mục outside the 5 "diễn giải" ones just list title + the
 // site's own RSS lead paragraph - see aiSummarize in lib/vnexpress.ts.
-const VNEXPRESS_RAW_CATEGORIES = new Set(['Kinh doanh', 'Bất động sản', 'Pháp luật', 'Đời sống', 'Du lịch']);
+const VNEXPRESS_RAW_CATEGORIES = new Set(['Kinh doanh', 'Bất động sản', 'Giải trí', 'Pháp luật', 'Đời sống', 'Du lịch']);
 
 function isVnexpressRawCategory(item: NewsItem): boolean {
   return item.source === 'Vnexpress' && VNEXPRESS_RAW_CATEGORIES.has(item.category || '');
@@ -45,7 +45,7 @@ function groupRawItems(items: NewsItem[]): DigestGroup[] {
     const key = `${item.source}::${item.category}`;
     let group = groups.get(key);
     if (!group) {
-      group = { source: item.source, category: item.category || 'Khác', items: [] };
+      group = { source: item.source, category: item.category || 'Khác', generatedAt: new Date().toISOString(), items: [] };
       groups.set(key, group);
     }
     group.items.push(toRawDigestItem(item));
@@ -68,7 +68,7 @@ function mergeDigestGroups(...groupLists: DigestGroup[][]): DigestGroup[] {
       if (existing) {
         existing.items.push(...group.items);
       } else {
-        merged.set(key, { source: group.source, category: group.category, items: [...group.items] });
+        merged.set(key, { source: group.source, category: group.category, generatedAt: group.generatedAt, items: [...group.items] });
       }
     }
   }

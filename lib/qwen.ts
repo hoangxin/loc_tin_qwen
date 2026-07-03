@@ -28,6 +28,9 @@ export interface DigestItem {
 export interface DigestGroup {
   source: string;
   category: string;
+  // When this mục's summaries were (re)built - lets the UI highlight tabs
+  // that were just refreshed vs. ones that are hours stale.
+  generatedAt: string;
   items: DigestItem[];
 }
 
@@ -241,6 +244,7 @@ async function summarizeGroup(
   return {
     source: group.source,
     category: group.category,
+    generatedAt: new Date().toISOString(),
     items: group.items.map((item, index) => toDigestItem(item, summaries[index], fallbackFlags[index])),
   };
 }
@@ -253,6 +257,7 @@ export async function summarizeWithQwen(news: NewsItem[], hours = 24): Promise<D
     return groups.map((group) => ({
       source: group.source,
       category: group.category,
+      generatedAt: new Date().toISOString(),
       items: group.items.map((item) => toDigestItem(item, fallbackSummary(item), true)),
     }));
   }

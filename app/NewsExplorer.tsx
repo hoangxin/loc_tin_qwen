@@ -28,16 +28,28 @@ const CATEGORY_ORDER: Record<string, string[]> = {
   Vnexpress: [
     'Thời sự',
     'Thế giới',
+    'Kinh doanh',
     'Khoa học công nghệ',
+    'Bất động sản',
+    'Giải trí',
+    'Pháp luật',
+    'Du lịch',
     'Sức khỏe',
     'Thể thao',
-    'Kinh doanh',
-    'Bất động sản',
-    'Pháp luật',
     'Đời sống',
-    'Du lịch',
   ],
 };
+
+const FRESH_WINDOW_MS = 60 * 60 * 1000;
+
+function isFresh(generatedAt: string): boolean {
+  const time = new Date(generatedAt).getTime();
+  return Number.isFinite(time) && Date.now() - time < FRESH_WINDOW_MS;
+}
+
+function categoryTabClassName(group: DigestGroup, isActive: boolean): string {
+  return ['category-tab', isActive && 'active', isFresh(group.generatedAt) && 'fresh'].filter(Boolean).join(' ');
+}
 
 function sortByCategoryOrder(source: string, categories: DigestGroup[]): DigestGroup[] {
   const order = CATEGORY_ORDER[source] ?? [];
@@ -115,7 +127,7 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
             {currentSource.categories.map((group) => (
               <button
                 key={group.category}
-                className={group.category === currentCategory.category ? 'category-tab active' : 'category-tab'}
+                className={categoryTabClassName(group, group.category === currentCategory.category)}
                 onClick={() => setActiveCategory(group.category)}
               >
                 {group.category}

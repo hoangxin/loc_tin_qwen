@@ -21,14 +21,15 @@ interface CategoryConfig {
 const CATEGORY_SOURCES: CategoryConfig[] = [
   { feedSlug: 'thoi-su', category: 'Thời sự', aiSummarize: true },
   { feedSlug: 'the-gioi', category: 'Thế giới', aiSummarize: true },
+  { feedSlug: 'kinh-doanh', category: 'Kinh doanh', aiSummarize: false },
   { feedSlug: 'khoa-hoc-cong-nghe', category: 'Khoa học công nghệ', aiSummarize: true },
+  { feedSlug: 'bat-dong-san', category: 'Bất động sản', aiSummarize: false },
+  { feedSlug: 'giai-tri', category: 'Giải trí', aiSummarize: false },
+  { feedSlug: 'phap-luat', category: 'Pháp luật', aiSummarize: false },
+  { feedSlug: 'du-lich', category: 'Du lịch', aiSummarize: false },
   { feedSlug: 'suc-khoe', category: 'Sức khỏe', aiSummarize: true },
   { feedSlug: 'the-thao', category: 'Thể thao', aiSummarize: true },
-  { feedSlug: 'kinh-doanh', category: 'Kinh doanh', aiSummarize: false },
-  { feedSlug: 'bat-dong-san', category: 'Bất động sản', aiSummarize: false },
-  { feedSlug: 'phap-luat', category: 'Pháp luật', aiSummarize: false },
   { feedSlug: 'doi-song', category: 'Đời sống', aiSummarize: false },
-  { feedSlug: 'du-lich', category: 'Du lịch', aiSummarize: false },
 ];
 
 const REQUEST_TIMEOUT_MS = 30000;
