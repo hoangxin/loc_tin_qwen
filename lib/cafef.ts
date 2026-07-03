@@ -33,6 +33,14 @@ const ARTICLE_SELECTOR = '.tlitem.box-category-item';
 // pagination if the 24h cutoff is somehow never hit (e.g. site format change).
 const MAX_PAGES_PER_CATEGORY = 30;
 const ARTICLE_BODY_SELECTOR = '.detail-content';
+// CafeF embeds two kinds of "other article" widgets *inside* .detail-content,
+// ahead of the real body paragraphs: an async "TIN MỚI" box
+// (#listNewsInContent, zone cafef_detail_relatednewsbox) and, when a writer
+// manually inserts one, a related-article link card
+// (.VCSortableInPreviewMode[type="link"]). Left in, their text gets scraped
+// as if it were this article's own content - producing a description (and
+// downstream AI summary) about a completely different article.
+const EXCLUDED_BODY_SELECTORS = '#listNewsInContent, [data-marked-zoneid="cafef_detail_relatednewsbox"], .VCSortableInPreviewMode[type="link"]';
 const MAX_DESCRIPTION_CHARS = 2000;
 // Cafef listing titles are often deliberately vague clickbait (e.g. "một cổ
 // phiếu", "một ngân hàng") - the specific names only show up in the article
@@ -151,6 +159,7 @@ async function fetchPage(url: string): Promise<cheerio.CheerioAPI> {
 async function fetchArticleExcerpt(link: string): Promise<string> {
   try {
     const $ = await fetchPage(link);
+    $(EXCLUDED_BODY_SELECTORS).remove();
     const paragraphs = $(`${ARTICLE_BODY_SELECTOR} p`)
       .map((_, el) => $(el).text().replace(/\s+/g, ' ').trim())
       .get()
