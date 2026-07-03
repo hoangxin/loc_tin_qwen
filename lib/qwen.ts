@@ -122,15 +122,17 @@ async function callQwen(apiKey: string, prompt: string): Promise<string> {
 }
 
 const RETRY_DELAY_MS = 1500;
+const MAX_RETRIES = 5;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// One retry after a transient error (rate limit, timeout, occasional
-// mismatched delimiter count) before giving up on this chunk - Promise.all
-// fires every chunk/group at once, so a single dropped request shouldn't
-// permanently demote a whole mục to the non-AI fallback.
+// A chunk that succeeds on the first try needs none of this - retries only
+// kick in once summarizeChunkOnce actually fails (rate limit, timeout,
+// occasional mismatched delimiter count). Promise.all fires every chunk/group
+// at once, so a single dropped request shouldn't permanently demote a whole
+// mục to the non-AI fallback.
 async function summarizeChunkOnce(
   apiKey: string,
   group: { source: string; category: string },
@@ -164,9 +166,9 @@ async function summarizeChunkOnce(
 }
 
 // Returns exactly `chunk.length` summaries, aligned 1:1 with `chunk`. Falls
-// back to a non-AI summary for the whole chunk if Qwen's response still
-// can't be split into the expected number of parts after a retry - safer
-// than risking a misaligned summary getting attributed to the wrong article.
+// back to a non-AI summary for the whole chunk only after MAX_RETRIES extra
+// attempts still can't get a clean response - safer than risking a
+// misaligned summary getting attributed to the wrong article.
 async function summarizeChunk(
   apiKey: string,
   group: { source: string; category: string },
@@ -175,15 +177,14 @@ async function summarizeChunk(
   chunkCount: number,
   hours: number
 ): Promise<{ summaries: string[]; usedFallback: boolean }> {
-  const first = await summarizeChunkOnce(apiKey, group, chunk, chunkIndex, chunkCount, hours);
-  if (first) return { summaries: first, usedFallback: false };
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) await sleep(RETRY_DELAY_MS);
 
-  await sleep(RETRY_DELAY_MS);
+    const result = await summarizeChunkOnce(apiKey, group, chunk, chunkIndex, chunkCount, hours);
+    if (result) return { summaries: result, usedFallback: false };
+  }
 
-  const retry = await summarizeChunkOnce(apiKey, group, chunk, chunkIndex, chunkCount, hours);
-  if (retry) return { summaries: retry, usedFallback: false };
-
-  console.error('qwen chunk failed after retry, using fallback', group.source, group.category);
+  console.error('qwen chunk failed after', MAX_RETRIES, 'retries, using fallback', group.source, group.category);
   return { summaries: chunk.map(fallbackSummary), usedFallback: true };
 }
 

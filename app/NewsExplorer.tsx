@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Digest } from '@/lib/digest';
 import type { DigestGroup } from '@/lib/qwen';
-import { formatTimestamp } from '@/lib/format';
+import { formatTimestamp, splitPrTag } from '@/lib/format';
 import TriggerDigestButton from './TriggerDigestButton';
 
 // Fixed so both tabs always render even when one source has no data yet
@@ -114,23 +114,27 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
           <h2 className="category-heading">{currentCategory.category}</h2>
 
           <div className="news-list">
-            {currentCategory.items.map((item) => (
-              <article className="news-card" key={item.link}>
-                <span className="timestamp">{formatTimestamp(item.publishedAt)}</span>
-                {item.usedFallback && (
-                  <span className="fallback-note">⚠ Tóm tắt tự động (Qwen lỗi, chưa qua AI)</span>
-                )}
-                <h4>
-                  <a href={item.link} target="_blank" rel="noreferrer">
-                    {item.title}
+            {currentCategory.items.map((item) => {
+              const { prTag, summary } = splitPrTag(item.summary);
+              return (
+                <article className="news-card" key={item.link}>
+                  <span className="timestamp">{formatTimestamp(item.publishedAt)}</span>
+                  {item.usedFallback && (
+                    <span className="fallback-note">⚠ Tóm tắt tự động (Qwen lỗi, chưa qua AI)</span>
+                  )}
+                  <h4>
+                    {prTag && <span className="pr-tag">{prTag}</span>}
+                    <a href={item.link} target="_blank" rel="noreferrer">
+                      {item.title}
+                    </a>
+                  </h4>
+                  <p>{summary}</p>
+                  <a className="read-more" href={item.link} target="_blank" rel="noreferrer">
+                    Đọc bài gốc →
                   </a>
-                </h4>
-                <p>{item.summary}</p>
-                <a className="read-more" href={item.link} target="_blank" rel="noreferrer">
-                  Đọc bài gốc →
-                </a>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </>
       )}

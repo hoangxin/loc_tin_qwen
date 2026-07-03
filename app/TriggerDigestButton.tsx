@@ -197,9 +197,11 @@ export default function TriggerDigestButton({
     return (
       <div className="trigger-form">
         <span className="trigger-message">{message}</span>
-        <button className="trigger-button trigger-button-secondary" disabled={cancelling} onClick={cancelRun}>
-          {cancelling ? 'Đang huỷ...' : runId ? 'Huỷ tổng hợp' : 'Huỷ chờ'}
-        </button>
+        {runId && (
+          <button className="trigger-button trigger-button-secondary" disabled={cancelling} onClick={cancelRun}>
+            {cancelling ? 'Đang huỷ...' : 'Huỷ tổng hợp'}
+          </button>
+        )}
       </div>
     );
   }
