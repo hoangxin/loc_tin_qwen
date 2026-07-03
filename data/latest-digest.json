@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-03T10:37:52.894Z",
-  "count": 490,
+  "generatedAt": "2026-07-03T15:51:34.105Z",
+  "count": 503,
   "groups": [
     {
       "source": "CafeF",
@@ -3578,6 +3578,104 @@
           "link": "https://vnexpress.net/31-nguoi-bi-khoi-to-trong-dai-an-tai-acv-5092417.html",
           "publishedAt": "2026-07-02T11:05:18.000Z",
           "summary": "Ông Vũ Thế Phiệt, Chủ tịch HĐQT Tổng công ty Cảng hàng không Việt Nam (ACV) cùng 30 người vừa bị khởi tố về 4 tội danh.",
+          "usedFallback": false
+        }
+      ]
+    },
+    {
+      "source": "Vnexpress",
+      "category": "Giải trí",
+      "generatedAt": "2026-07-03T15:51:34.104Z",
+      "items": [
+        {
+          "title": "Các cầu thủ bóng đá lấn sân phim ảnh",
+          "link": "https://vnexpress.net/cac-cau-thu-bong-da-lan-san-phim-anh-5092676.html",
+          "publishedAt": "2026-07-03T13:12:11.000Z",
+          "summary": "David Beckham, Pelé, Eric Cantona, Neymar cùng nhiều danh thủ thử sức với diễn xuất qua các dự án điện ảnh và truyền hình.",
+          "usedFallback": false
+        },
+        {
+          "title": "Diễn viên 'Hoàng hậu cuối cùng' gây tranh luận",
+          "link": "https://vnexpress.net/dien-vien-hoang-hau-cuoi-cung-gay-tranh-luan-5093155.html",
+          "publishedAt": "2026-07-03T11:30:18.000Z",
+          "summary": "Một số khán giả nhận xét Tăng Thanh Hà chưa phù hợp khí chất Nam Phương hoàng hậu, số khác cho rằng tạo hình nhân vật không nhất thiết giống nguyên mẫu.",
+          "usedFallback": false
+        },
+        {
+          "title": "Diễn viên Hong Kong 'lột xác' sau giảm cân",
+          "link": "https://vnexpress.net/dien-vien-hong-kong-lot-xac-sau-giam-can-5093083.html",
+          "publishedAt": "2026-07-03T09:07:07.000Z",
+          "summary": "Diễn viên TVB Ngô Văn Ý tự nhận từng ham ăn đến mức béo phì nặng 95 kg, hiện duy trì mức 50 kg.",
+          "usedFallback": false
+        },
+        {
+          "title": "20 năm hoạt động showbiz của Tăng Nhật Tuệ trước khi bị bắt",
+          "link": "https://vnexpress.net/20-nam-hoat-dong-showbiz-cua-tang-nhat-tue-truoc-khi-bi-bat-5092884.html",
+          "publishedAt": "2026-07-03T07:52:04.000Z",
+          "summary": "Tăng Nhật Tuệ, 40 tuổi, sáng tác nhiều hit như \"Chạm khẽ tim anh một chút thôi\", \"Cho em gần anh thêm chút nữa\", trước khi bị bắt vì ma túy.",
+          "usedFallback": false
+        },
+        {
+          "title": "Sắc vóc vợ người mẫu của cầu thủ Bernardo Silva",
+          "link": "https://vnexpress.net/sac-voc-vo-nguoi-mau-cua-cau-thu-bernardo-silva-5092971.html",
+          "publishedAt": "2026-07-03T07:04:30.000Z",
+          "summary": "Ines Degener Tomaz, vợ cầu thủ Bồ Đào Nha Bernardo Silva, được các tạp chí thời trang nhận xét phong cách vừa quyến rũ vừa thanh lịch.",
+          "usedFallback": false
+        },
+        {
+          "title": "Selena Gomez và dàn sao dự tiệc trước lễ cưới của Taylor Swift",
+          "link": "https://vnexpress.net/selena-gomez-va-dan-sao-du-tiec-truoc-le-cuoi-cua-taylor-swift-5092898.html",
+          "publishedAt": "2026-07-03T04:56:17.000Z",
+          "summary": "Selena Gomez, Gigi Hadid và bạn trai - tài tử Bradley Cooper - thuộc nhóm 100 khách mời dự tiệc tối trước hôn lễ của Taylor Swift.",
+          "usedFallback": false
+        },
+        {
+          "title": "Đạo diễn Lương Đình Dũng làm phim về văn hóa Việt",
+          "link": "https://vnexpress.net/dao-dien-luong-dinh-dung-lam-phim-ve-van-hoa-viet-5091861.html",
+          "publishedAt": "2026-07-03T03:57:39.000Z",
+          "summary": "Đạo diễn Lương Đình Dũng sẽ quay phim \"Profile đất nước của tôi\", giới thiệu vẻ đẹp 34 tỉnh thành Việt Nam.",
+          "usedFallback": false
+        },
+        {
+          "title": "Hương Tràm học hỏi Hoàng Thùy Linh trong âm nhạc",
+          "link": "https://vnexpress.net/huong-tram-hoc-hoi-hoang-thuy-linh-trong-am-nhac-5092323.html",
+          "publishedAt": "2026-07-03T03:20:10.000Z",
+          "summary": "Ca sĩ Hương Tràm nói thích cách Hoàng Thùy Linh đưa âm nhạc dân gian đến với công chúng nên học hỏi để thực hiện MV \"gái Nghệ\".",
+          "usedFallback": false
+        },
+        {
+          "title": "Vòng tay World Cup gây sốt",
+          "link": "https://vnexpress.net/vong-tay-world-cup-gay-sot-5092734.html",
+          "publishedAt": "2026-07-03T02:47:32.000Z",
+          "summary": "Các cổ động viên lên sân không chỉ cổ vũ mà còn để săn vòng tay World Cup được phát miễn phí.",
+          "usedFallback": false
+        },
+        {
+          "title": "'Taylor Swift có thể chi hơn 10 triệu USD cho lễ cưới'",
+          "link": "https://vnexpress.net/taylor-swift-co-the-chi-hon-10-trieu-usd-cho-le-cuoi-5092459.html",
+          "publishedAt": "2026-07-03T02:21:09.000Z",
+          "summary": "Các chuyên gia tổ chức tiệc cưới, an ninh cho rằng Taylor Swift chi khoảng 10 triệu USD cho hôn lễ, hơn ba triệu USD cho vấn đề bảo an.",
+          "usedFallback": false
+        },
+        {
+          "title": "'Điện ảnh Việt gặp thách thức bản quyền thời AI'",
+          "link": "https://vnexpress.net/dien-anh-viet-gap-thach-thuc-ban-quyen-thoi-ai-5092146.html",
+          "publishedAt": "2026-07-03T02:14:14.000Z",
+          "summary": "Một số chuyên gia cho rằng AI giúp tối ưu chi phí và năng lực sáng tạo, nhưng cũng có thể đẩy nhà sản xuất phim vào \"vùng xám\" pháp lý.",
+          "usedFallback": false
+        },
+        {
+          "title": "Cuộc sống tuổi trung niên của nghệ sĩ Nguyệt Hằng",
+          "link": "https://vnexpress.net/cuoc-song-tuoi-trung-nien-cua-nghe-si-nguyet-hang-5091567.html",
+          "publishedAt": "2026-07-02T17:00:00.000Z",
+          "summary": "Diễn viên Nguyệt Hằng, 53 tuổi, tận hưởng niềm vui từ công việc diễn xuất, giảng dạy, trân trọng sự bình an bên gia đình.",
+          "usedFallback": false
+        },
+        {
+          "title": "Nghi vấn truyện đoạt giải Khối Thịnh vượng chung do AI viết",
+          "link": "https://vnexpress.net/nghi-van-truyen-doat-giai-khoi-thinh-vuong-chung-do-ai-viet-5092731.html",
+          "publishedAt": "2026-07-02T17:00:00.000Z",
+          "summary": "Nhiều người cho rằng ''The Serpent in the Grove'' - đoạt quán quân giải thưởng truyện ngắn Khối Thịnh vượng chung - do AI sáng tác.",
           "usedFallback": false
         }
       ]
