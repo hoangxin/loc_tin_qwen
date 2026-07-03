@@ -7,7 +7,7 @@ const REPO = 'loc_tin_qwen';
 const WORKFLOW_FILE = 'news-digest.yml';
 const MIN_HOURS = 1;
 const MAX_HOURS = 168;
-const VALID_SOURCES = ['CafeF', 'Vietstock'];
+const VALID_SOURCES = ['CafeF', 'Vietstock', 'Vnexpress'];
 
 const GITHUB_HEADERS = (token: string) => ({
   Authorization: `Bearer ${token}`,

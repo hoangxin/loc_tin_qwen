@@ -9,10 +9,10 @@ import TriggerDigestButton from './TriggerDigestButton';
 // Fixed so both tabs always render even when one source has no data yet
 // (e.g. its crawl failed on the last run) - a source silently disappearing
 // from the tab bar would be confusing.
-const KNOWN_SOURCES = ['CafeF', 'Vietstock'];
+const KNOWN_SOURCES = ['CafeF', 'Vietstock', 'Vnexpress'];
 
 // Display order for each source's mục tabs - doesn't match crawl/declaration
-// order in cafef.ts/vietstock.ts, so it has to be spelled out here.
+// order in cafef.ts/vietstock.ts/vnexpress.ts, so it has to be spelled out here.
 const CATEGORY_ORDER: Record<string, string[]> = {
   CafeF: [
     'Thị trường chứng khoán',
@@ -22,8 +22,21 @@ const CATEGORY_ORDER: Record<string, string[]> = {
     'Tài chính quốc tế',
     'Vĩ mô đầu tư',
     'Thị trường',
+    'Xã hội',
   ],
   Vietstock: ['Chứng khoán', 'Doanh nghiệp', 'Bất động sản', 'Tài chính', 'Hàng hóa', 'Kinh tế', 'Thế giới'],
+  Vnexpress: [
+    'Thời sự',
+    'Thế giới',
+    'Khoa học công nghệ',
+    'Sức khỏe',
+    'Thể thao',
+    'Kinh doanh',
+    'Bất động sản',
+    'Pháp luật',
+    'Đời sống',
+    'Du lịch',
+  ],
 };
 
 function sortByCategoryOrder(source: string, categories: DigestGroup[]): DigestGroup[] {

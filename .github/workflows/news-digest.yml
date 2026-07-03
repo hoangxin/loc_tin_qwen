@@ -9,7 +9,7 @@ on:
         default: '24'
         type: string
       source:
-        description: 'Nguồn tin: CafeF, Vietstock, hoặc để trống = cả 2'
+        description: 'Nguồn tin: CafeF, Vietstock, Vnexpress, hoặc để trống = cả 3'
         required: false
         default: ''
         type: string

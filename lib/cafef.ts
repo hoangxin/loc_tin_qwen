@@ -5,6 +5,10 @@ export interface NewsItem {
   title: string;
   link: string;
   description?: string;
+  // The source site's own short lead/dẫn nhập (CafeF's listing-page "sapo",
+  // VnExpress RSS's contentSnippet) - used verbatim for mục that skip AI
+  // summarization instead of the full fetched article body.
+  intro?: string;
   source: string;
   publishedAt: string;
   pubDate?: string;
@@ -19,6 +23,7 @@ const CATEGORY_SOURCES = [
   { url: 'https://cafef.vn/tai-chinh-quoc-te.chn', category: 'Tài chính quốc tế' },
   { url: 'https://cafef.vn/vi-mo-dau-tu.chn', category: 'Vĩ mô đầu tư' },
   { url: 'https://cafef.vn/thi-truong.chn', category: 'Thị trường' },
+  { url: 'https://cafef.vn/xa-hoi.chn', category: 'Xã hội' },
 ];
 
 const REQUEST_TIMEOUT_MS = 30000;
@@ -38,6 +43,7 @@ interface RawArticle {
   title: string;
   href: string;
   timeText: string;
+  intro: string;
 }
 
 function normalizeLink(href: string): string {
@@ -66,11 +72,13 @@ function extractArticles($: cheerio.CheerioAPI): RawArticle[] {
     const el = $(node);
     const linkEl = el.find('h3 a').first();
     const timeEl = el.find('.time-ago').first();
+    const introEl = el.find('.sapo.box-category-sapo').first();
 
     articles.push({
       title: linkEl.text().trim(),
       href: linkEl.attr('href') || '',
       timeText: timeEl.attr('title') || timeEl.text().trim(),
+      intro: introEl.text().trim(),
     });
   });
 
@@ -157,6 +165,7 @@ async function crawlCategory(url: string, category: string, cutoff: number): Pro
         title: article.title,
         link,
         description: '',
+        intro: article.intro,
         source: 'CafeF',
         publishedAt: publishedAt.toISOString(),
         pubDate: publishedAt.toISOString(),
