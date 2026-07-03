@@ -24,6 +24,8 @@ export default function TriggerDigestButton({
   const [hours, setHours] = useState(String(DEFAULT_HOURS));
   const [selected, setSelected] = useState<Set<string>>(new Set(categories));
   const [message, setMessage] = useState('');
+  const [runId, setRunId] = useState<number | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const pollHandle = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -64,6 +66,7 @@ export default function TriggerDigestButton({
   function openForm() {
     setSelected(new Set(categories));
     setHours(String(DEFAULT_HOURS));
+    setRunId(null);
     setStatus('asking');
   }
 
@@ -104,6 +107,7 @@ export default function TriggerDigestButton({
         return;
       }
 
+      setRunId(typeof data.runId === 'number' ? data.runId : null);
       setMessage(
         `Đã kích hoạt tổng hợp ${source} (${selected.size}/${categories.length} mục) trong ${data.hours}h gần nhất. Trang sẽ tự tải lại khi xong.`
       );
@@ -113,6 +117,29 @@ export default function TriggerDigestButton({
       setMessage('Không kết nối được tới server.');
       setStatus('error');
     }
+  }
+
+  // Bails out of an already-triggered run - the main use case is catching a
+  // mis-clicked mục/hours before the job reaches the Claude/Qwen step and
+  // actually spends tokens. Best-effort: even if the cancel call itself
+  // fails, still send the user back to "asking" so they can fix and re-run.
+  async function cancelRun() {
+    setCancelling(true);
+    stopPolling();
+    if (runId) {
+      try {
+        await fetch('/api/cancel-digest', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ runId }),
+        });
+      } catch {
+        // best effort
+      }
+    }
+    setCancelling(false);
+    setRunId(null);
+    setStatus('asking');
   }
 
   if (status === 'idle') {
@@ -166,19 +193,22 @@ export default function TriggerDigestButton({
     );
   }
 
+  if (status === 'waiting') {
+    return (
+      <div className="trigger-form">
+        <span className="trigger-message">{message}</span>
+        <button className="trigger-button trigger-button-secondary" disabled={cancelling} onClick={cancelRun}>
+          {cancelling ? 'Đang huỷ...' : runId ? 'Huỷ tổng hợp' : 'Huỷ chờ'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="trigger-form">
-      <span className={status === 'error' ? 'trigger-message trigger-message-error' : 'trigger-message'}>
-        {message}
-      </span>
-      <button
-        className="trigger-button trigger-button-secondary"
-        onClick={() => {
-          stopPolling();
-          setStatus('idle');
-        }}
-      >
-        {status === 'waiting' ? 'Huỷ chờ' : 'Đóng'}
+      <span className="trigger-message trigger-message-error">{message}</span>
+      <button className="trigger-button trigger-button-secondary" onClick={() => setStatus('idle')}>
+        Đóng
       </button>
     </div>
   );
