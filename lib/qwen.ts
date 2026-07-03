@@ -61,6 +61,30 @@ function fallbackSummary(item: NewsItem): string {
   return item.description ? item.description.slice(0, 300) : item.title;
 }
 
+function capitalizeFirst(text: string): string {
+  return text.charAt(0).toLocaleUpperCase('vi-VN') + text.slice(1);
+}
+
+// Safety net for the prompt instruction above: Qwen still occasionally
+// chains several facts into one run-on sentence joined by ";" instead of
+// splitting them into separate sentences - break those back into sentences
+// ending in "." so the digest doesn't render a giant semicolon-spliced clause.
+function normalizeSummaryPunctuation(summary: string): string {
+  const sentences = summary
+    .split(/;\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (sentences.length <= 1) return summary;
+
+  return sentences
+    .map((sentence, index) => {
+      const withPeriod = /[.!?]$/.test(sentence) ? sentence : `${sentence}.`;
+      return index === 0 ? withPeriod : capitalizeFirst(withPeriod);
+    })
+    .join(' ');
+}
+
 function buildPrompt(
   group: { source: string; category: string },
   chunk: NewsItem[],
@@ -73,6 +97,7 @@ function buildPrompt(
 - Đây là mục "${group.category}" của ${group.source}. Tóm tắt TẤT CẢ các tin dưới đây trong vòng ${hours}h qua, theo trình tự thời gian (tin mới nhất trước), không tự categorize lại theo chủ đề.
 - Không được cắt bớt danh sách tin, không làm ví dụ mẫu, không chỉ chọn vài tin. Phải xử lý toàn bộ danh sách tin được cung cấp.
 - Mỗi tin tóm tắt nội dung chính trong vài câu, tóm tắt trực diện, xúc tích, đi thẳng vào các yếu tố chính (vd: bối cảnh, sự kiện, nguyên nhân, tác động, .v.v.).
+- Viết mỗi ý/dữ kiện thành một câu riêng, kết thúc bằng dấu chấm. TUYỆT ĐỐI KHÔNG nối nhiều câu/mệnh đề lại với nhau bằng dấu chấm phẩy ";" thành một câu dài - chỉ dùng dấu phẩy trong nội bộ một câu khi liệt kê ngắn, còn giữa các câu/ý khác nhau bắt buộc ngắt câu bằng dấu chấm.
 - Với các tin càng quan trọng (liên quan cổ phiếu/các thị trường, tin tài chính/kinh tế/vỹ mô nổi bật, sự kiện chính trị và tin tức thế giới nổi bật) thì tóm tắt càng chi tiết, tin ít quan trọng thì tóm tắt ngắn gọn (vd trong 1-3 câu).
 - Riêng với các tin PR, native ads (tin quảng cáo trá hình dưới dạng tin tức - thường gặp ở mục bất động sản/doanh nghiệp: bài giới thiệu/ca ngợi tiện ích, vị trí, ưu đãi mở bán của một dự án/sản phẩm/thương hiệu cụ thể mà không có góc nhìn phân tích hay phản biện khách quan, đọc như thông cáo báo chí của doanh nghiệp), không bỏ qua nhưng mở đầu đoạn tóm tắt bằng "(PR/native ads)" rồi tóm tắt sơ lược 1-2 câu. Không gắn tag này cho tin phân tích xu hướng, tin tức doanh nghiệp/kinh tế/công nghệ thông thường dù có nhắc tên công ty cụ thể - chỉ gắn khi tin đó chủ yếu quảng bá cho một dự án/sản phẩm/thương hiệu, không mang giá trị tin tức khách quan nào khác.
 - Tiêu đề gốc trên Cafef/Vietstock hay giấu tên cụ thể (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi"). Phần "Nội dung" bên dưới mỗi tin là trích đoạn bài viết gốc - BẮT BUỘC đọc kỹ và nêu rõ tên/mã cụ thể (mã cổ phiếu, tên công ty/ngân hàng, con số, chính sách...) nếu trích đoạn có đề cập, tuyệt đối không lặp lại cách nói chung chung của tiêu đề khi thông tin cụ thể đã có sẵn.
@@ -150,7 +175,8 @@ async function summarizeChunkOnce(
     const parts = raw
       .split(ITEM_DELIMITER)
       .map((part) => part.trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .map(normalizeSummaryPunctuation);
 
     if (parts.length !== chunk.length) {
       console.error('qwen summary count mismatch', {

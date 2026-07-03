@@ -60,6 +60,19 @@ function normalizeLink(href: string): string {
 // so the string is unambiguous regardless of where this code runs.
 function parsePublishedAt(timeText: string): Date | null {
   const trimmed = timeText.trim();
+
+  // The pinned "nổi bật" box at the top of a category page renders its
+  // timestamp as visible "DD/MM/YYYY - HH:mm" text instead of the .time-ago
+  // ISO title used by regular listing items (its own data-time attribute is
+  // buggy - CafeF's template mangles the day, e.g. "202\07\2026 - 00:07" for
+  // "02/07/2026 - 00:07" - so the visible text is the only reliable source).
+  const vnFormat = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})\s*-\s*(\d{2}):(\d{2})$/);
+  if (vnFormat) {
+    const [, dd, mm, yyyy, hh, min] = vnFormat;
+    const date = new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:00+07:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
   const hasOffset = /(Z|[+-]\d{2}:?\d{2})$/.test(trimmed);
   const date = new Date(hasOffset ? trimmed : `${trimmed}+07:00`);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -79,6 +92,39 @@ function extractArticles($: cheerio.CheerioAPI): RawArticle[] {
       href: linkEl.attr('href') || '',
       timeText: timeEl.attr('title') || timeEl.text().trim(),
       intro: introEl.text().trim(),
+    });
+  });
+
+  return articles;
+}
+
+// The top of every category page pins ~3 "nổi bật" articles in a
+// `.list-focus-main` box (1 big `.firstitem` + 2 `.big` items in
+// `.cate-hl-row2`) that sits outside the regular `.tlitem.box-category-item`
+// list ARTICLE_SELECTOR matches - without this they're silently skipped.
+// Only the first (non-paginated) page has this box.
+function extractHighlightArticles($: cheerio.CheerioAPI): RawArticle[] {
+  const articles: RawArticle[] = [];
+
+  const firstItem = $('.list-focus-main .firstitem').first();
+  if (firstItem.length) {
+    const linkEl = firstItem.find('.hl-info h2 a').first();
+    articles.push({
+      title: linkEl.text().trim(),
+      href: linkEl.attr('href') || '',
+      timeText: firstItem.find('.hl-info p.time').first().text().trim(),
+      intro: firstItem.find('.hl-info p.sapo').first().text().trim(),
+    });
+  }
+
+  $('.list-focus-main .cate-hl-row2 [role="article"]').each((_, node) => {
+    const el = $(node);
+    const linkEl = el.find('h3 a').first();
+    articles.push({
+      title: linkEl.text().trim(),
+      href: linkEl.attr('href') || '',
+      timeText: el.find('p.time').first().text().trim(),
+      intro: el.find('p.sapo').first().text().trim(),
     });
   });
 
@@ -145,7 +191,7 @@ async function crawlCategory(url: string, category: string, cutoff: number): Pro
   for (let pageIndex = 1; pageIndex <= MAX_PAGES_PER_CATEGORY; pageIndex++) {
     const $ = pageIndex === 1 ? firstPage : await fetchPage(`https://cafef.vn/timelinelist/${zoneId}/${pageIndex}.chn`);
 
-    const rawArticles = extractArticles($);
+    const rawArticles = pageIndex === 1 ? [...extractHighlightArticles($), ...extractArticles($)] : extractArticles($);
     if (!rawArticles.length) break;
 
     let reachedCutoff = false;
