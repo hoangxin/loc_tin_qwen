@@ -105,9 +105,9 @@ function buildPrompt(
 - Riêng với các tin PR, native ads (tin quảng cáo trá hình dưới dạng tin tức - thường gặp ở mục bất động sản/doanh nghiệp: bài giới thiệu/ca ngợi tiện ích, vị trí, ưu đãi mở bán của một dự án/sản phẩm/thương hiệu cụ thể mà không có góc nhìn phân tích hay phản biện khách quan, đọc như thông cáo báo chí của doanh nghiệp), không bỏ qua nhưng mở đầu đoạn tóm tắt bằng "(PR/Native Ads)" rồi tóm tắt sơ lược 1-2 câu. Không gắn tag này cho tin phân tích xu hướng, tin tức doanh nghiệp/kinh tế/công nghệ thông thường dù có nhắc tên công ty cụ thể - chỉ gắn khi tin đó chủ yếu quảng bá cho một dự án/sản phẩm/thương hiệu, không mang giá trị tin tức khách quan nào khác.
 - Tiêu đề gốc trên Cafef/Vietstock hay giấu tên cụ thể (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi"). Phần "Nội dung" bên dưới mỗi tin là trích đoạn bài viết gốc - BẮT BUỘC đọc kỹ và nêu rõ tên/mã cụ thể (mã cổ phiếu, tên công ty/ngân hàng, con số, chính sách...) nếu trích đoạn có đề cập, tuyệt đối không lặp lại cách nói chung chung của tiêu đề khi thông tin cụ thể đã có sẵn.
 - Không viết các câu nhận xét sáo rỗng, chung chung, ai cũng tự suy ra được và không bổ sung thông tin mới (vd "đây là động thái đáng chú ý", "ảnh hưởng đến nhà đầu tư", "là thông tin quan trọng với thị trường"). Mỗi câu trong tóm tắt phải mang một dữ kiện/số liệu/sự kiện cụ thể.
-- CHỈ trả về đoạn văn tóm tắt của từng tin - không lặp lại tiêu đề, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
-- Mỗi đoạn tóm tắt BẮT BUỘC bắt đầu bằng đúng số thứ tự của tin đó trong danh sách dưới đây theo định dạng "N)" (vd tin thứ 3 bắt đầu bằng "3)"), ngay sau đó mới đến nội dung tóm tắt - dùng để đối chiếu đúng tin, không được bỏ qua hay đánh sai số.
-- Trả về đúng ${chunk.length} đoạn tóm tắt theo đúng thứ tự danh sách tin bên dưới, mỗi đoạn cách nhau bằng một dòng chỉ chứa duy nhất "${ITEM_DELIMITER}".
+- Mỗi đoạn BẮT BUỘC viết theo đúng định dạng: N) TIÊU ĐỀ GỐC|||nội dung tóm tắt - trong đó N là số thứ tự của tin đó trong danh sách dưới đây, TIÊU ĐỀ GỐC là chép lại NGUYÊN VĂN không sửa một chữ tiêu đề của đúng tin đó, "|||" là dấu phân cách bắt buộc ngay sau tiêu đề. Đây là cơ chế đối chiếu tự động - số thứ tự hoặc tiêu đề chép sai/thiếu sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
+- Phần nội dung tóm tắt (sau dấu "|||") mới là đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
+- Trả về đúng ${chunk.length} đoạn theo đúng thứ tự danh sách tin bên dưới, mỗi đoạn cách nhau bằng một dòng chỉ chứa duy nhất "${ITEM_DELIMITER}".
 
 Chunk ${chunkIndex + 1}/${chunkCount} của mục này.
 
@@ -166,18 +166,39 @@ function sleep(ms: number): Promise<void> {
 // occasional mismatched delimiter count). Promise.all fires every chunk/group
 // at once, so a single dropped request shouldn't permanently demote a whole
 // mục to the non-AI fallback.
-// Strips the mandatory "N)" index prefix the prompt requires on every item,
-// but only if it matches this item's actual position - a plain item-count
-// check can't catch a model that inserts a stray preamble/meta-commentary
-// sentence (e.g. restating the instructions) ahead of an item's real
-// summary, since the @@@-delimiter count still comes out right even though
-// that one item's content is now garbled and misattributed. Requiring - and
-// verifying - a sequential index turns that into a detectable failure
-// instead of silently shipping the wrong text under the right title.
-function stripIndexPrefix(part: string, expectedIndex: number): string | null {
-  const match = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
-  if (!match) return null;
-  return part.slice(match[0].length).trim();
+const TITLE_SEPARATOR = '|||';
+
+// A plain item-count check can't catch a model that garbles or misattributes
+// one item's content while still producing the right number of @@@-delimited
+// parts - it might insert a stray meta-commentary sentence instead of real
+// content, or (harder to catch) correctly count items but attach the wrong
+// article's content under a given position. Requiring the model to echo the
+// *exact* original title back alongside its index, then verifying both
+// against what we actually sent, turns either failure into a detectable
+// mismatch instead of silently shipping the wrong text under a real title.
+function normalizeForCompare(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[""„]/g, '"')
+    .replace(/['']/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function stripIndexAndTitle(part: string, expectedIndex: number, expectedTitle: string): string | null {
+  const indexMatch = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
+  if (!indexMatch) return null;
+  const rest = part.slice(indexMatch[0].length);
+
+  const separatorIndex = rest.indexOf(TITLE_SEPARATOR);
+  if (separatorIndex === -1) return null;
+
+  const echoedTitle = rest.slice(0, separatorIndex);
+  const body = rest.slice(separatorIndex + TITLE_SEPARATOR.length).trim();
+  if (!body) return null;
+  if (normalizeForCompare(echoedTitle) !== normalizeForCompare(expectedTitle)) return null;
+
+  return body;
 }
 
 async function summarizeChunkOnce(
@@ -207,13 +228,14 @@ async function summarizeChunkOnce(
 
     const parts: string[] = [];
     for (let index = 0; index < rawParts.length; index++) {
-      const stripped = stripIndexPrefix(rawParts[index], index + 1);
+      const stripped = stripIndexAndTitle(rawParts[index], index + 1, chunk[index].title);
       if (stripped === null) {
-        console.error('qwen summary missing/mismatched index prefix', {
+        console.error('qwen summary index/title mismatch', {
           source: group.source,
           category: group.category,
           expectedIndex: index + 1,
-          gotPreview: rawParts[index].slice(0, 100),
+          expectedTitle: chunk[index].title,
+          gotPreview: rawParts[index].slice(0, 120),
         });
         return null;
       }
