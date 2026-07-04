@@ -186,13 +186,17 @@ const TITLE_SEPARATOR = '|||';
 // *exact* original title back alongside its index, then verifying both
 // against what we actually sent, turns either failure into a detectable
 // mismatch instead of silently shipping the wrong text under a real title.
+// Strips everything except letters/digits (after Unicode NFC normalization)
+// so quote style, dashes, whitespace, punctuation, and - critically - the
+// NFC vs NFD encoding of Vietnamese diacritics (two different byte
+// sequences that render identically) never cause a false mismatch. Those
+// were firing spuriously often enough to burn through retries on
+// essentially-correct output, which is what made summarization slow after
+// the title-echo check was added - the actual-content-mismatch case this
+// guards against still fails reliably, since a wrong title's letters won't
+// match regardless of formatting.
 function normalizeForCompare(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[""„]/g, '"')
-    .replace(/['']/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
+  return text.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 }
 
 interface ParsedItem {
