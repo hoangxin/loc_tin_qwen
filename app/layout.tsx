@@ -3,7 +3,7 @@ import React from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Lọc Tin',
+  title: 'HoangXin News',
   description: 'Tổng hợp và tóm tắt tin tài chính từ CafeF, Vietstock',
 };
 

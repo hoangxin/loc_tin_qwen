@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <main className="page">
       <header className="site-header">
-        <h1>Lọc Tin</h1>
+        <h1>HoangXin News</h1>
         <span className="updated-at">
           {data.generatedAt ? `Cập nhật lúc ${formatTimestamp(data.generatedAt)}` : 'Chưa có dữ liệu'}
         </span>
