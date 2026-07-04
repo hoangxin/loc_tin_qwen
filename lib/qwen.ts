@@ -111,12 +111,11 @@ function buildPrompt(
 - Riêng với các tin PR, native ads (tin quảng cáo trá hình dưới dạng tin tức - thường gặp ở mục bất động sản/doanh nghiệp: bài giới thiệu/ca ngợi tiện ích, vị trí, ưu đãi mở bán của một dự án/sản phẩm/thương hiệu cụ thể mà không có góc nhìn phân tích hay phản biện khách quan, đọc như thông cáo báo chí của doanh nghiệp), không bỏ qua nhưng mở đầu đoạn tóm tắt bằng "(PR/Native Ads)" rồi tóm tắt sơ lược 1-2 câu. Không gắn tag này cho tin phân tích xu hướng, tin tức doanh nghiệp/kinh tế/công nghệ thông thường dù có nhắc tên công ty cụ thể - chỉ gắn khi tin đó chủ yếu quảng bá cho một dự án/sản phẩm/thương hiệu, không mang giá trị tin tức khách quan nào khác.
 - Tiêu đề gốc trên Cafef/Vietstock hay giấu tên cụ thể (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi"). Phần "Nội dung" bên dưới mỗi tin là trích đoạn bài viết gốc - BẮT BUỘC đọc kỹ và nêu rõ tên/mã cụ thể (mã cổ phiếu, tên công ty/ngân hàng, con số, chính sách...) nếu trích đoạn có đề cập, tuyệt đối không lặp lại cách nói chung chung của tiêu đề khi thông tin cụ thể đã có sẵn.
 - Không viết các câu nhận xét sáo rỗng, chung chung, ai cũng tự suy ra được và không bổ sung thông tin mới (vd "đây là động thái đáng chú ý", "ảnh hưởng đến nhà đầu tư", "là thông tin quan trọng với thị trường"). Mỗi câu trong tóm tắt phải mang một dữ kiện/số liệu/sự kiện cụ thể.
-- Mỗi đoạn BẮT BUỘC viết theo đúng định dạng: N) TIÊU ĐỀ GỐC|||TIÊU ĐỀ HIỂN THỊ|||nội dung tóm tắt. Trong đó:
-  + N là số thứ tự của tin đó trong danh sách dưới đây.
-  + TIÊU ĐỀ GỐC là chép lại NGUYÊN VĂN, không sửa một chữ, tiêu đề của đúng tin đó - đây là cơ chế đối chiếu tự động, số thứ tự hoặc tiêu đề gốc chép sai/thiếu sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
-  + TIÊU ĐỀ HIỂN THỊ: nếu tiêu đề gốc đã đủ ngắn gọn, rõ nghĩa thì chép lại y nguyên tiêu đề gốc vào đây; nếu tiêu đề gốc quá dài hoặc tối nghĩa/mập mờ kiểu clickbait (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi") thì viết một tiêu đề MỚI ngắn gọn hơn, rõ nghĩa hơn, có chứa từ khóa/tên cụ thể lấy đúng từ nội dung tóm tắt bên dưới - không bịa thông tin ngoài nội dung đã tóm tắt.
-  + "|||" là dấu phân cách bắt buộc, xuất hiện đúng 2 lần trong mỗi đoạn để ngăn cách 3 phần trên.
-- Phần nội dung tóm tắt (sau dấu "|||" thứ hai) mới là đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị làm nội dung cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
+- Mỗi đoạn BẮT BUỘC viết theo đúng định dạng: N) TIÊU ĐỀ HIỂN THỊ|||nội dung tóm tắt. Trong đó:
+  + N là số thứ tự của tin đó trong danh sách dưới đây - đây là cơ chế đối chiếu tự động, đánh sai/bỏ sót số thứ tự sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
+  + TIÊU ĐỀ HIỂN THỊ: nếu tiêu đề gốc của tin đó đã đủ ngắn gọn, rõ nghĩa thì chép lại y nguyên tiêu đề gốc vào đây; nếu tiêu đề gốc quá dài hoặc tối nghĩa/mập mờ kiểu clickbait (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi") thì viết một tiêu đề MỚI ngắn gọn hơn, rõ nghĩa hơn, có chứa từ khóa/tên cụ thể lấy đúng từ nội dung tóm tắt bên dưới - không bịa thông tin ngoài nội dung đã tóm tắt.
+  + "|||" là dấu phân cách bắt buộc, xuất hiện đúng 1 lần trong mỗi đoạn để ngăn cách 2 phần trên.
+- Phần nội dung tóm tắt (sau dấu "|||") mới là đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị làm nội dung cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
 - Trả về đúng ${chunk.length} đoạn theo đúng thứ tự danh sách tin bên dưới, mỗi đoạn cách nhau bằng một dòng chỉ chứa duy nhất "${ITEM_DELIMITER}".
 
 Chunk ${chunkIndex + 1}/${chunkCount} của mục này.
@@ -178,50 +177,70 @@ function sleep(ms: number): Promise<void> {
 // mục to the non-AI fallback.
 const TITLE_SEPARATOR = '|||';
 
-// A plain item-count check can't catch a model that garbles or misattributes
-// one item's content while still producing the right number of @@@-delimited
-// parts - it might insert a stray meta-commentary sentence instead of real
-// content, or (harder to catch) correctly count items but attach the wrong
-// article's content under a given position. Requiring the model to echo the
-// *exact* original title back alongside its index, then verifying both
-// against what we actually sent, turns either failure into a detectable
-// mismatch instead of silently shipping the wrong text under a real title.
-// Strips everything except letters/digits (after Unicode NFC normalization)
-// so quote style, dashes, whitespace, punctuation, and - critically - the
-// NFC vs NFD encoding of Vietnamese diacritics (two different byte
-// sequences that render identically) never cause a false mismatch. Those
-// were firing spuriously often enough to burn through retries on
-// essentially-correct output, which is what made summarization slow after
-// the title-echo check was added - the actual-content-mismatch case this
-// guards against still fails reliably, since a wrong title's letters won't
-// match regardless of formatting.
-function normalizeForCompare(text: string): string {
-  return text.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
-}
-
+// A plain item-count check can't catch a model that garbles a single item
+// while still producing the right number of @@@-delimited parts overall -
+// e.g. inserting a stray meta-commentary sentence (restating the
+// instructions) instead of real content for one item. Requiring a
+// sequential index prefix on every item turns that into a detectable
+// failure instead of silently shipping garbled text under a real title.
+//
+// An earlier version also required the model to echo the *exact* original
+// title back for comparison, to additionally guard against a (never
+// actually observed) case where the index numbering is correct but the
+// wrong article's content gets attached anyway. That extra check made
+// summarization noticeably slower - it doubled the title text in the
+// output and, worse, exact-string comparison is fragile (quote style,
+// whitespace, NFC vs NFD Vietnamese diacritics all render identically but
+// compare unequal), so it kept forcing retries on already-correct
+// responses. Dropped in favor of just the index check, which already
+// catches the failure mode actually seen in production.
+//
+// Kept here, disabled, as a fallback in case the index-only check ever
+// proves insufficient in practice - re-enable by restoring the
+// "N) TIÊU ĐỀ GỐC|||TIÊU ĐỀ HIỂN THỊ|||nội dung" format in buildPrompt's
+// format bullet, then swapping parseNumberedSummary's call site below for
+// parseTitledSummary(rawParts[index], index + 1, chunk[index].title).
+//
+// function normalizeForCompare(text: string): string {
+//   return text.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+// }
+//
+// function parseTitledSummary(part: string, expectedIndex: number, expectedTitle: string): ParsedItem | null {
+//   const indexMatch = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
+//   if (!indexMatch) return null;
+//   const rest = part.slice(indexMatch[0].length);
+//
+//   const firstSeparator = rest.indexOf(TITLE_SEPARATOR);
+//   if (firstSeparator === -1) return null;
+//   const echoedTitle = rest.slice(0, firstSeparator);
+//   if (normalizeForCompare(echoedTitle) !== normalizeForCompare(expectedTitle)) return null;
+//
+//   const afterEcho = rest.slice(firstSeparator + TITLE_SEPARATOR.length);
+//   const secondSeparator = afterEcho.indexOf(TITLE_SEPARATOR);
+//   if (secondSeparator === -1) return null;
+//   const displayTitle = afterEcho.slice(0, secondSeparator).trim();
+//   const summary = afterEcho.slice(secondSeparator + TITLE_SEPARATOR.length).trim();
+//   if (!displayTitle || !summary) return null;
+//
+//   return { displayTitle, summary };
+// }
 interface ParsedItem {
   displayTitle: string;
   summary: string;
 }
 
-// Splits "TIÊU ĐỀ GỐC|||TIÊU ĐỀ HIỂN THỊ|||nội dung" after the index prefix
-// has been stripped. Returns the display title (may equal the original) and
-// the actual summary body, or null if either separator/field is missing.
-function parseTitledSummary(part: string, expectedIndex: number, expectedTitle: string): ParsedItem | null {
+// Splits "N) TIÊU ĐỀ HIỂN THỊ|||nội dung" into the index-validated display
+// title (may equal the original) and the summary body, or null if the
+// index prefix or separator is missing/malformed.
+function parseNumberedSummary(part: string, expectedIndex: number): ParsedItem | null {
   const indexMatch = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
   if (!indexMatch) return null;
   const rest = part.slice(indexMatch[0].length);
 
-  const firstSeparator = rest.indexOf(TITLE_SEPARATOR);
-  if (firstSeparator === -1) return null;
-  const echoedTitle = rest.slice(0, firstSeparator);
-  if (normalizeForCompare(echoedTitle) !== normalizeForCompare(expectedTitle)) return null;
-
-  const afterEcho = rest.slice(firstSeparator + TITLE_SEPARATOR.length);
-  const secondSeparator = afterEcho.indexOf(TITLE_SEPARATOR);
-  if (secondSeparator === -1) return null;
-  const displayTitle = afterEcho.slice(0, secondSeparator).trim();
-  const summary = afterEcho.slice(secondSeparator + TITLE_SEPARATOR.length).trim();
+  const separator = rest.indexOf(TITLE_SEPARATOR);
+  if (separator === -1) return null;
+  const displayTitle = rest.slice(0, separator).trim();
+  const summary = rest.slice(separator + TITLE_SEPARATOR.length).trim();
   if (!displayTitle || !summary) return null;
 
   return { displayTitle, summary };
@@ -254,13 +273,12 @@ async function summarizeChunkOnce(
 
     const parts: ParsedItem[] = [];
     for (let index = 0; index < rawParts.length; index++) {
-      const parsed = parseTitledSummary(rawParts[index], index + 1, chunk[index].title);
+      const parsed = parseNumberedSummary(rawParts[index], index + 1);
       if (parsed === null) {
-        console.error('qwen summary index/title mismatch', {
+        console.error('qwen summary index mismatch', {
           source: group.source,
           category: group.category,
           expectedIndex: index + 1,
-          expectedTitle: chunk[index].title,
           gotPreview: rawParts[index].slice(0, 120),
         });
         return null;
