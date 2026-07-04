@@ -16,6 +16,12 @@ const ITEM_DELIMITER = '@@@';
 
 export interface DigestItem {
   title: string;
+  // AI-rewritten title, only set when Qwen judged the original too long/vague
+  // and produced a clearer one during summarization - the UI shows this
+  // instead of `title` when present, but `title` (the real scraped headline)
+  // is always kept around too. Raw (non-AI) mục and fallback summaries never
+  // set this, since only a real Qwen pass can vouch for a rewritten title.
+  displayTitle?: string;
   link: string;
   publishedAt: string;
   summary: string;
@@ -105,8 +111,12 @@ function buildPrompt(
 - Riêng với các tin PR, native ads (tin quảng cáo trá hình dưới dạng tin tức - thường gặp ở mục bất động sản/doanh nghiệp: bài giới thiệu/ca ngợi tiện ích, vị trí, ưu đãi mở bán của một dự án/sản phẩm/thương hiệu cụ thể mà không có góc nhìn phân tích hay phản biện khách quan, đọc như thông cáo báo chí của doanh nghiệp), không bỏ qua nhưng mở đầu đoạn tóm tắt bằng "(PR/Native Ads)" rồi tóm tắt sơ lược 1-2 câu. Không gắn tag này cho tin phân tích xu hướng, tin tức doanh nghiệp/kinh tế/công nghệ thông thường dù có nhắc tên công ty cụ thể - chỉ gắn khi tin đó chủ yếu quảng bá cho một dự án/sản phẩm/thương hiệu, không mang giá trị tin tức khách quan nào khác.
 - Tiêu đề gốc trên Cafef/Vietstock hay giấu tên cụ thể (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi"). Phần "Nội dung" bên dưới mỗi tin là trích đoạn bài viết gốc - BẮT BUỘC đọc kỹ và nêu rõ tên/mã cụ thể (mã cổ phiếu, tên công ty/ngân hàng, con số, chính sách...) nếu trích đoạn có đề cập, tuyệt đối không lặp lại cách nói chung chung của tiêu đề khi thông tin cụ thể đã có sẵn.
 - Không viết các câu nhận xét sáo rỗng, chung chung, ai cũng tự suy ra được và không bổ sung thông tin mới (vd "đây là động thái đáng chú ý", "ảnh hưởng đến nhà đầu tư", "là thông tin quan trọng với thị trường"). Mỗi câu trong tóm tắt phải mang một dữ kiện/số liệu/sự kiện cụ thể.
-- Mỗi đoạn BẮT BUỘC viết theo đúng định dạng: N) TIÊU ĐỀ GỐC|||nội dung tóm tắt - trong đó N là số thứ tự của tin đó trong danh sách dưới đây, TIÊU ĐỀ GỐC là chép lại NGUYÊN VĂN không sửa một chữ tiêu đề của đúng tin đó, "|||" là dấu phân cách bắt buộc ngay sau tiêu đề. Đây là cơ chế đối chiếu tự động - số thứ tự hoặc tiêu đề chép sai/thiếu sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
-- Phần nội dung tóm tắt (sau dấu "|||") mới là đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
+- Mỗi đoạn BẮT BUỘC viết theo đúng định dạng: N) TIÊU ĐỀ GỐC|||TIÊU ĐỀ HIỂN THỊ|||nội dung tóm tắt. Trong đó:
+  + N là số thứ tự của tin đó trong danh sách dưới đây.
+  + TIÊU ĐỀ GỐC là chép lại NGUYÊN VĂN, không sửa một chữ, tiêu đề của đúng tin đó - đây là cơ chế đối chiếu tự động, số thứ tự hoặc tiêu đề gốc chép sai/thiếu sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
+  + TIÊU ĐỀ HIỂN THỊ: nếu tiêu đề gốc đã đủ ngắn gọn, rõ nghĩa thì chép lại y nguyên tiêu đề gốc vào đây; nếu tiêu đề gốc quá dài hoặc tối nghĩa/mập mờ kiểu clickbait (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi") thì viết một tiêu đề MỚI ngắn gọn hơn, rõ nghĩa hơn, có chứa từ khóa/tên cụ thể lấy đúng từ nội dung tóm tắt bên dưới - không bịa thông tin ngoài nội dung đã tóm tắt.
+  + "|||" là dấu phân cách bắt buộc, xuất hiện đúng 2 lần trong mỗi đoạn để ngăn cách 3 phần trên.
+- Phần nội dung tóm tắt (sau dấu "|||" thứ hai) mới là đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị làm nội dung cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
 - Trả về đúng ${chunk.length} đoạn theo đúng thứ tự danh sách tin bên dưới, mỗi đoạn cách nhau bằng một dòng chỉ chứa duy nhất "${ITEM_DELIMITER}".
 
 Chunk ${chunkIndex + 1}/${chunkCount} của mục này.
@@ -185,20 +195,32 @@ function normalizeForCompare(text: string): string {
     .trim();
 }
 
-function stripIndexAndTitle(part: string, expectedIndex: number, expectedTitle: string): string | null {
+interface ParsedItem {
+  displayTitle: string;
+  summary: string;
+}
+
+// Splits "TIÊU ĐỀ GỐC|||TIÊU ĐỀ HIỂN THỊ|||nội dung" after the index prefix
+// has been stripped. Returns the display title (may equal the original) and
+// the actual summary body, or null if either separator/field is missing.
+function parseTitledSummary(part: string, expectedIndex: number, expectedTitle: string): ParsedItem | null {
   const indexMatch = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
   if (!indexMatch) return null;
   const rest = part.slice(indexMatch[0].length);
 
-  const separatorIndex = rest.indexOf(TITLE_SEPARATOR);
-  if (separatorIndex === -1) return null;
-
-  const echoedTitle = rest.slice(0, separatorIndex);
-  const body = rest.slice(separatorIndex + TITLE_SEPARATOR.length).trim();
-  if (!body) return null;
+  const firstSeparator = rest.indexOf(TITLE_SEPARATOR);
+  if (firstSeparator === -1) return null;
+  const echoedTitle = rest.slice(0, firstSeparator);
   if (normalizeForCompare(echoedTitle) !== normalizeForCompare(expectedTitle)) return null;
 
-  return body;
+  const afterEcho = rest.slice(firstSeparator + TITLE_SEPARATOR.length);
+  const secondSeparator = afterEcho.indexOf(TITLE_SEPARATOR);
+  if (secondSeparator === -1) return null;
+  const displayTitle = afterEcho.slice(0, secondSeparator).trim();
+  const summary = afterEcho.slice(secondSeparator + TITLE_SEPARATOR.length).trim();
+  if (!displayTitle || !summary) return null;
+
+  return { displayTitle, summary };
 }
 
 async function summarizeChunkOnce(
@@ -208,7 +230,7 @@ async function summarizeChunkOnce(
   chunkIndex: number,
   chunkCount: number,
   hours: number
-): Promise<string[] | null> {
+): Promise<ParsedItem[] | null> {
   try {
     const raw = await callQwen(apiKey, buildPrompt(group, chunk, chunkIndex, chunkCount, hours));
     const rawParts = raw
@@ -226,10 +248,10 @@ async function summarizeChunkOnce(
       return null;
     }
 
-    const parts: string[] = [];
+    const parts: ParsedItem[] = [];
     for (let index = 0; index < rawParts.length; index++) {
-      const stripped = stripIndexAndTitle(rawParts[index], index + 1, chunk[index].title);
-      if (stripped === null) {
+      const parsed = parseTitledSummary(rawParts[index], index + 1, chunk[index].title);
+      if (parsed === null) {
         console.error('qwen summary index/title mismatch', {
           source: group.source,
           category: group.category,
@@ -239,7 +261,7 @@ async function summarizeChunkOnce(
         });
         return null;
       }
-      parts.push(normalizeSummaryPunctuation(stripped));
+      parts.push({ displayTitle: parsed.displayTitle, summary: normalizeSummaryPunctuation(parsed.summary) });
     }
 
     return parts;
@@ -260,20 +282,27 @@ async function summarizeChunk(
   chunkIndex: number,
   chunkCount: number,
   hours: number
-): Promise<{ summaries: string[]; usedFallback: boolean }> {
+): Promise<{ items: ParsedItem[]; usedFallback: boolean }> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) await sleep(RETRY_DELAY_MS);
 
     const result = await summarizeChunkOnce(apiKey, group, chunk, chunkIndex, chunkCount, hours);
-    if (result) return { summaries: result, usedFallback: false };
+    if (result) return { items: result, usedFallback: false };
   }
 
   console.error('qwen chunk failed after', MAX_RETRIES, 'retries, using fallback', group.source, group.category);
-  return { summaries: chunk.map(fallbackSummary), usedFallback: true };
+  return { items: chunk.map((item) => ({ displayTitle: item.title, summary: fallbackSummary(item) })), usedFallback: true };
 }
 
-function toDigestItem(item: NewsItem, summary: string, usedFallback: boolean): DigestItem {
-  return { title: item.title, link: item.link, publishedAt: item.publishedAt, summary, usedFallback };
+function toDigestItem(item: NewsItem, summary: string, usedFallback: boolean, displayTitle?: string): DigestItem {
+  return {
+    title: item.title,
+    displayTitle: displayTitle && displayTitle !== item.title ? displayTitle : undefined,
+    link: item.link,
+    publishedAt: item.publishedAt,
+    summary,
+    usedFallback,
+  };
 }
 
 async function summarizeGroup(
@@ -289,14 +318,16 @@ async function summarizeGroup(
   const chunkResults = await Promise.all(
     chunks.map((chunk, chunkIndex) => summarizeChunk(apiKey, group, chunk, chunkIndex, chunks.length, hours))
   );
-  const summaries = chunkResults.flatMap((result) => result.summaries);
+  const parsedItems = chunkResults.flatMap((result) => result.items);
   const fallbackFlags = chunkResults.flatMap((result, chunkIndex) => chunks[chunkIndex].map(() => result.usedFallback));
 
   return {
     source: group.source,
     category: group.category,
     generatedAt: new Date().toISOString(),
-    items: group.items.map((item, index) => toDigestItem(item, summaries[index], fallbackFlags[index])),
+    items: group.items.map((item, index) =>
+      toDigestItem(item, parsedItems[index].summary, fallbackFlags[index], parsedItems[index].displayTitle)
+    ),
   };
 }
 

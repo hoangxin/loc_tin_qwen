@@ -149,8 +149,8 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
                   )}
                   <h4>
                     {prTag && <span className="pr-tag">{prTag}</span>}
-                    <a href={item.link} target="_blank" rel="noreferrer">
-                      {item.title}
+                    <a href={item.link} target="_blank" rel="noreferrer" title={item.displayTitle ? item.title : undefined}>
+                      {item.displayTitle || item.title}
                     </a>
                   </h4>
                   <p>{summary}</p>
