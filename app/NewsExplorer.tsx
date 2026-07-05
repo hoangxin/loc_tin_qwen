@@ -136,36 +136,38 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
             ))}
           </div>
 
-          <h2 className="category-heading">{currentCategory.category}</h2>
+          <div className="category-panel">
+            <h2 className="category-heading">{currentCategory.category}</h2>
 
-          <div className="news-list">
-            {currentCategory.items.map((item) => {
-              const { prTag: summaryPrTag, summary } = splitPrTag(item.summary);
-              // Qwen is only instructed to prefix the *summary* with the PR tag, but
-              // occasionally carries it over onto the rewritten display title too -
-              // strip it from there as well so it never renders as plain (black)
-              // title text instead of the bordeaux badge.
-              const { prTag: titlePrTag, summary: displayTitle } = splitPrTag(item.displayTitle || item.title);
-              const prTag = summaryPrTag || titlePrTag;
-              return (
-                <article className="news-card" key={item.link}>
-                  <span className="timestamp">{formatTimestamp(item.publishedAt)}</span>
-                  {item.usedFallback && (
-                    <span className="fallback-note">⚠ Tóm tắt tự động (Qwen lỗi, chưa qua AI)</span>
-                  )}
-                  <h4>
-                    {prTag && <span className="pr-tag">{prTag}</span>}
-                    <a href={item.link} target="_blank" rel="noreferrer" title={item.displayTitle ? item.title : undefined}>
-                      {displayTitle}
+            <div className="news-list">
+              {currentCategory.items.map((item) => {
+                const { prTag: summaryPrTag, summary } = splitPrTag(item.summary);
+                // Qwen is only instructed to prefix the *summary* with the PR tag, but
+                // occasionally carries it over onto the rewritten display title too -
+                // strip it from there as well so it never renders as plain (black)
+                // title text instead of the bordeaux badge.
+                const { prTag: titlePrTag, summary: displayTitle } = splitPrTag(item.displayTitle || item.title);
+                const prTag = summaryPrTag || titlePrTag;
+                return (
+                  <article className="news-card" key={item.link}>
+                    <span className="timestamp">{formatTimestamp(item.publishedAt)}</span>
+                    {item.usedFallback && (
+                      <span className="fallback-note">⚠ Tóm tắt tự động (Qwen lỗi, chưa qua AI)</span>
+                    )}
+                    <h4>
+                      {prTag && <span className="pr-tag">{prTag}</span>}
+                      <a href={item.link} target="_blank" rel="noreferrer" title={item.displayTitle ? item.title : undefined}>
+                        {displayTitle}
+                      </a>
+                    </h4>
+                    <p>{summary}</p>
+                    <a className="read-more" href={item.link} target="_blank" rel="noreferrer">
+                      Đọc bài gốc →
                     </a>
-                  </h4>
-                  <p>{summary}</p>
-                  <a className="read-more" href={item.link} target="_blank" rel="noreferrer">
-                    Đọc bài gốc →
-                  </a>
-                </article>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </>
       )}

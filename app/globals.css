@@ -233,7 +233,6 @@ body {
   background: #e3e5ea;
   border-radius: 10px 10px 0 0;
   padding: 8px 8px 0;
-  margin-bottom: 24px;
 }
 
 .category-tab {
@@ -268,7 +267,7 @@ body {
 }
 
 .category-tab.active {
-  background: var(--bg);
+  background: var(--surface);
   color: var(--accent);
   z-index: 1;
   font-weight: 700;
@@ -277,7 +276,7 @@ body {
 }
 
 .category-tab.active:hover {
-  background: var(--bg);
+  background: var(--surface);
   color: var(--accent);
   transform: none;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
@@ -298,13 +297,13 @@ body {
 }
 
 .category-tab.fresh.active {
-  background: var(--bg);
+  background: var(--surface);
   color: var(--fresh-text);
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14), inset 0 -3px 0 var(--fresh-border);
 }
 
 .category-tab.fresh.active:hover {
-  background: var(--bg);
+  background: var(--surface);
   color: var(--fresh-text);
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14), inset 0 -3px 0 var(--fresh-border);
 }
@@ -313,6 +312,20 @@ body {
   font-size: 11px;
   color: inherit;
   opacity: 0.75;
+}
+
+/* The active category tab and this panel share the same surface color and
+   sit with zero gap between them (see .category-tabs above), so the tab
+   visually fuses into the panel below it - Chrome-tab style - while
+   inactive tabs stay on the darker toolbar band and read as "sunken". */
+.category-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 10px 10px 10px;
+  padding: 20px 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
 }
 
 .category-heading {
