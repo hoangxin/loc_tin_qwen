@@ -68,18 +68,18 @@ body {
   background: linear-gradient(180deg, #2b2f38, #14161a);
   color: #fff;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 5px 0 #000, 0 9px 16px rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 8px 0 #000, 0 14px 26px rgba(0, 0, 0, 0.4);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .trigger-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 7px 0 #000, 0 14px 22px rgba(0, 0, 0, 0.36);
+  transform: translateY(-3px);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 11px 0 #000, 0 20px 32px rgba(0, 0, 0, 0.45);
 }
 
 .trigger-button:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 0 #000, 0 2px 6px rgba(0, 0, 0, 0.24);
+  transform: translateY(3px);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 2px 0 #000, 0 4px 10px rgba(0, 0, 0, 0.32);
 }
 
 .trigger-button:disabled {
@@ -91,15 +91,15 @@ body {
   background: linear-gradient(180deg, #ffffff, #eef0f2);
   color: var(--text);
   border: 1px solid rgba(0, 0, 0, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 5px 0 var(--border), 0 9px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 8px 0 var(--border), 0 14px 26px rgba(0, 0, 0, 0.14);
 }
 
 .trigger-button-secondary:hover:not(:disabled) {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 7px 0 var(--border), 0 14px 22px rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 11px 0 var(--border), 0 20px 32px rgba(0, 0, 0, 0.16);
 }
 
 .trigger-button-secondary:active:not(:disabled) {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 0 var(--border), 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 2px 0 var(--border), 0 4px 10px rgba(0, 0, 0, 0.14);
 }
 
 .trigger-form {
@@ -200,15 +200,12 @@ body {
   cursor: pointer;
   margin-right: -8px;
   position: relative;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 3px 0 rgba(0, 0, 0, 0.2), 0 7px 12px rgba(0, 0, 0, 0.14);
-  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .source-tab:hover {
   background: #adb1bc;
   color: var(--text);
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 4px 0 rgba(0, 0, 0, 0.22), 0 10px 16px rgba(0, 0, 0, 0.18);
 }
 
 .source-tab:last-child {
@@ -219,15 +216,11 @@ body {
   background: var(--tab-band);
   color: var(--accent);
   z-index: 1;
-  transform: none;
-  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.16);
 }
 
 .source-tab.active:hover {
   background: var(--tab-band);
   color: var(--accent);
-  transform: none;
-  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.16);
 }
 
 /* Real Chrome tabs never wrap to a second row - a wrapped row would put a
@@ -264,8 +257,7 @@ body {
   min-width: 0;
   margin-right: -6px;
   position: relative;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 0 rgba(0, 0, 0, 0.16), 0 5px 10px rgba(0, 0, 0, 0.1);
-  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .category-tab-label {
@@ -283,8 +275,6 @@ body {
 .category-tab:hover {
   background: #c3c7cf;
   color: var(--text);
-  transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 3px 0 rgba(0, 0, 0, 0.18), 0 7px 12px rgba(0, 0, 0, 0.14);
 }
 
 .category-tab:last-child {
@@ -300,15 +290,11 @@ body {
      tabs) so it only takes as much room as it actually needs, leaving the
      rest for the other, still-equally-shared tabs. */
   flex: 0 0 auto;
-  transform: none;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
 }
 
 .category-tab.active:hover {
   background: var(--surface);
   color: var(--accent);
-  transform: none;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
 }
 
 /* "Fresh" mục (< 1h since last summarize) - bright blue to pop out of the
@@ -316,25 +302,21 @@ body {
 .category-tab.fresh {
   background: var(--fresh-bg);
   color: var(--fresh-text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 0 rgba(29, 78, 216, 0.35), 0 5px 10px rgba(29, 78, 216, 0.22);
 }
 
 .category-tab.fresh:hover {
   background: #c7ddfd;
   color: var(--fresh-text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 3px 0 rgba(29, 78, 216, 0.4), 0 7px 12px rgba(29, 78, 216, 0.28);
 }
 
 .category-tab.fresh.active {
   background: var(--surface);
   color: var(--fresh-text);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14), inset 0 -3px 0 var(--fresh-border);
 }
 
 .category-tab.fresh.active:hover {
   background: var(--surface);
   color: var(--fresh-text);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14), inset 0 -3px 0 var(--fresh-border);
 }
 
 .category-tab-count {
