@@ -8,6 +8,10 @@
   --accent-soft: #fdecec;
   --pr-tag-text: #7a1030;
   --pr-tag-bg: #fbe3ea;
+  /* Shared between the category-tabs band and the active source-tab's
+     background so the two tiers fuse into one surface - see the nested
+     Chrome-tab comment above .source-tab.active below. */
+  --tab-band: #e3e5ea;
   /* "Fresh" (< 1h since last summarize) mục tab - bright blue, to stand out
      against the muted-gray default of tabs that haven't been refreshed. */
   --fresh-bg: #dbeafe;
@@ -164,14 +168,15 @@ body {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
 }
 
-/* Chrome-style tab strips: tabs sit flush against each other on a muted
-   toolbar band, the active tab's background matches the page so it visually
-   fuses with the content directly below it. Source tabs are the outer/bigger
-   tier, category tabs the inner/smaller tier - same language, different
-   scale, so the hierarchy still reads at a glance. */
+/* Chrome-style tab strips, nested two levels deep: the active source tab's
+   background matches the category-tabs band directly below it (so it fuses
+   into that band with zero gap - see .source-tabs-row above), and in turn
+   the active category tab's background matches the content panel below
+   *that*. Source tabs are the outer/bigger tier, category tabs the
+   inner/smaller tier - same language, different scale, so the hierarchy
+   still reads as one connected surface instead of stacked, separate boxes. */
 .source-tabs {
   display: flex;
   align-items: flex-end;
@@ -211,7 +216,7 @@ body {
 }
 
 .source-tab.active {
-  background: var(--bg);
+  background: var(--tab-band);
   color: var(--accent);
   z-index: 1;
   transform: none;
@@ -219,18 +224,24 @@ body {
 }
 
 .source-tab.active:hover {
-  background: var(--bg);
+  background: var(--tab-band);
   color: var(--accent);
   transform: none;
   box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.16);
 }
 
+/* Real Chrome tabs never wrap to a second row - a wrapped row would put a
+   whole line of "sunken" inactive tabs between the active tab and the
+   panel below it, breaking the flush illusion entirely. So every mục tab
+   shares the row equally (flex: 1 1 0) instead of wrapping or scrolling;
+   the active one just claims a bigger share (see .category-tab.active)
+   so its label has room to show in full while the rest truncate. */
 .category-tabs {
   display: flex;
   align-items: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0;
-  background: #e3e5ea;
+  background: var(--tab-band);
   border-radius: 10px 10px 0 0;
   padding: 8px 8px 0;
 }
@@ -249,11 +260,25 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex: 1 1 0;
+  min-width: 0;
   margin-right: -6px;
   position: relative;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 0 rgba(0, 0, 0, 0.16), 0 5px 10px rgba(0, 0, 0, 0.1);
   transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
+
+.category-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.category-tab.active .category-tab-label {
+  overflow: visible;
+}
+
 
 .category-tab:hover {
   background: #c3c7cf;
@@ -271,6 +296,7 @@ body {
   color: var(--accent);
   z-index: 1;
   font-weight: 700;
+  flex: 3 1 0;
   transform: none;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
 }
@@ -312,6 +338,7 @@ body {
   font-size: 11px;
   color: inherit;
   opacity: 0.75;
+  flex-shrink: 0;
 }
 
 /* The active category tab and this panel share the same surface color and

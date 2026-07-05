@@ -130,7 +130,7 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
                 className={categoryTabClassName(group, group.category === currentCategory.category)}
                 onClick={() => setActiveCategory(group.category)}
               >
-                {group.category}
+                <span className="category-tab-label">{group.category}</span>
                 <span className="category-tab-count">{group.items.length}</span>
               </button>
             ))}
