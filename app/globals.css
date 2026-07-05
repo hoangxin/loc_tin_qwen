@@ -232,10 +232,10 @@ body {
 
 /* Real Chrome tabs never wrap to a second row - a wrapped row would put a
    whole line of "sunken" inactive tabs between the active tab and the
-   panel below it, breaking the flush illusion entirely. So every mục tab
-   shares the row equally (flex: 1 1 0) instead of wrapping or scrolling;
-   the active one just claims a bigger share (see .category-tab.active)
-   so its label has room to show in full while the rest truncate. */
+   panel below it, breaking the flush illusion entirely. So the inactive
+   mục tabs share the remaining row width equally (flex: 1 1 0) instead of
+   wrapping or scrolling, while the active one sizes to its own label (see
+   .category-tab.active) so it only takes the room it actually needs. */
 .category-tabs {
   display: flex;
   align-items: flex-end;
@@ -296,7 +296,10 @@ body {
   color: var(--accent);
   z-index: 1;
   font-weight: 700;
-  flex: 3 1 0;
+  /* Sized to fit its own label (not a fixed multiplier of the shared-width
+     tabs) so it only takes as much room as it actually needs, leaving the
+     rest for the other, still-equally-shared tabs. */
+  flex: 0 0 auto;
   transform: none;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
 }
