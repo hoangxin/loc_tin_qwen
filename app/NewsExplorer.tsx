@@ -140,7 +140,13 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
 
           <div className="news-list">
             {currentCategory.items.map((item) => {
-              const { prTag, summary } = splitPrTag(item.summary);
+              const { prTag: summaryPrTag, summary } = splitPrTag(item.summary);
+              // Qwen is only instructed to prefix the *summary* with the PR tag, but
+              // occasionally carries it over onto the rewritten display title too -
+              // strip it from there as well so it never renders as plain (black)
+              // title text instead of the bordeaux badge.
+              const { prTag: titlePrTag, summary: displayTitle } = splitPrTag(item.displayTitle || item.title);
+              const prTag = summaryPrTag || titlePrTag;
               return (
                 <article className="news-card" key={item.link}>
                   <span className="timestamp">{formatTimestamp(item.publishedAt)}</span>
@@ -150,7 +156,7 @@ export default function NewsExplorer({ digest }: { digest: Digest }) {
                   <h4>
                     {prTag && <span className="pr-tag">{prTag}</span>}
                     <a href={item.link} target="_blank" rel="noreferrer" title={item.displayTitle ? item.title : undefined}>
-                      {item.displayTitle || item.title}
+                      {displayTitle}
                     </a>
                   </h4>
                   <p>{summary}</p>
