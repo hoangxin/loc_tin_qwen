@@ -103,6 +103,7 @@ function buildPrompt(
 ): string {
   return `Mày là trợ lý phân tích tài chính, hỗ trợ tao tổng hợp và tóm tắt thông tin. Tiêu chí tổng hợp tóm tắt tin cho tao như sau:
 
+- BẮT BUỘC viết toàn bộ tiêu đề và nội dung tóm tắt bằng đúng ngôn ngữ gốc của trang nguồn ${group.source} (trang tiếng Việt thì tóm tắt bằng tiếng Việt) - dù phần "Nội dung" trích đoạn gốc có xen lẫn câu/đoạn bằng ngôn ngữ khác (báo giá/trích dẫn quốc tế, tin tài chính quốc tế...), PHẢI dịch/diễn đạt lại toàn bộ ý đó sang đúng ngôn ngữ của trang nguồn trước khi đưa vào tóm tắt, tuyệt đối không được lẫn ngôn ngữ khác vào bài tóm tắt. Chỉ giữ nguyên ngôn ngữ khác với tên riêng không có cách dịch chuẩn (tên công ty, mã cổ phiếu, tên người, tên tổ chức).
 - Đây là mục "${group.category}" của ${group.source}. Tóm tắt TẤT CẢ các tin dưới đây trong vòng ${hours}h qua, theo trình tự thời gian (tin mới nhất trước), không tự categorize lại theo chủ đề.
 - Không được cắt bớt danh sách tin, không làm ví dụ mẫu, không chỉ chọn vài tin. Phải xử lý toàn bộ danh sách tin được cung cấp.
 - Mỗi tin tóm tắt nội dung chính, tóm tắt trực diện, xúc tích, đi thẳng vào các yếu tố chính (vd: bối cảnh, sự kiện, nguyên nhân, tác động, .v.v.). TỐI ĐA 5 câu cho mỗi tin, không được vượt quá dù tin có nhiều thông tin đến đâu - chỉ chọn giữ lại những dữ kiện/số liệu quan trọng nhất, bỏ bớt chi tiết phụ.
