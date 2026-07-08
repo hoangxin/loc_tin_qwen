@@ -22,7 +22,6 @@ const NEXT_PAGE_SELECTOR = 'a[title="Trang sau"]';
 // pagination if the 24h cutoff is somehow never hit (e.g. site format change).
 const MAX_PAGES_PER_CATEGORY = 30;
 const ARTICLE_BODY_SELECTOR = '.article-content';
-const MAX_DESCRIPTION_CHARS = 2000;
 // Article detail pages are static HTML (no JS needed), so they're fetched
 // with plain axios instead of Puppeteer - the single-process chromium
 // instance used for listing pages can't cheaply host ~100 extra tabs.
@@ -145,7 +144,7 @@ async function fetchArticleExcerpt(link: string): Promise<string> {
       .get()
       .filter(Boolean);
 
-    return paragraphs.join(' ').slice(0, MAX_DESCRIPTION_CHARS);
+    return paragraphs.join(' ');
   } catch (error) {
     console.error('vietstock article body error', link, error);
     return '';

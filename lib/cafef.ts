@@ -41,7 +41,6 @@ const ARTICLE_BODY_SELECTOR = '.detail-content';
 // as if it were this article's own content - producing a description (and
 // downstream AI summary) about a completely different article.
 const EXCLUDED_BODY_SELECTORS = '#listNewsInContent, [data-marked-zoneid="cafef_detail_relatednewsbox"], .VCSortableInPreviewMode[type="link"]';
-const MAX_DESCRIPTION_CHARS = 2000;
 // Cafef listing titles are often deliberately vague clickbait (e.g. "một cổ
 // phiếu", "một ngân hàng") - the specific names only show up in the article
 // body, so it has to be fetched separately from the listing page.
@@ -165,7 +164,7 @@ async function fetchArticleExcerpt(link: string): Promise<string> {
       .get()
       .filter(Boolean);
 
-    return paragraphs.join(' ').slice(0, MAX_DESCRIPTION_CHARS);
+    return paragraphs.join(' ');
   } catch (error) {
     console.error('cafef article body error', link, error);
     return '';

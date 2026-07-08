@@ -35,7 +35,6 @@ const CATEGORY_SOURCES: CategoryConfig[] = [
 const REQUEST_TIMEOUT_MS = 30000;
 const REQUEST_HEADERS = { 'User-Agent': 'Mozilla/5.0' };
 const ARTICLE_BODY_SELECTOR = '.fck_detail';
-const MAX_DESCRIPTION_CHARS = 2000;
 // Only the AI-summarized mục need the full article body (to match CafeF's
 // requirement of surfacing specific names/numbers a vague title hides) - the
 // non-AI mục show the RSS lead as-is, so there's nothing to fetch for them.
@@ -59,7 +58,7 @@ async function fetchArticleExcerpt(link: string): Promise<string> {
       .get()
       .filter(Boolean);
 
-    return paragraphs.join(' ').slice(0, MAX_DESCRIPTION_CHARS);
+    return paragraphs.join(' ');
   } catch (error) {
     console.error('vnexpress article body error', link, error);
     return '';
