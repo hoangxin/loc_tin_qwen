@@ -9,10 +9,6 @@ const CHUNK_SIZE = 15;
 // that blew past the old 8192 cap, truncating mid-list every single retry
 // (temperature 0 means retries reproduce the same over-length response).
 const MAX_TOKENS = 24576;
-// Qwen is asked to return only the summary prose for each item, split by
-// this marker - the website renders title/timestamp/link itself from the
-// original NewsItem fields instead of trusting the model to format them.
-const ITEM_DELIMITER = '@@@';
 
 export interface DigestItem {
   title: string;
@@ -112,12 +108,11 @@ function buildPrompt(
 - Riêng với các tin PR, native ads (tin quảng cáo trá hình dưới dạng tin tức - thường gặp ở mục bất động sản/doanh nghiệp: bài giới thiệu/ca ngợi tiện ích, vị trí, ưu đãi mở bán của một dự án/sản phẩm/thương hiệu cụ thể mà không có góc nhìn phân tích hay phản biện khách quan, đọc như thông cáo báo chí của doanh nghiệp), không bỏ qua nhưng mở đầu đoạn tóm tắt bằng "(PR/Native Ads)" rồi tóm tắt sơ lược 1-2 câu. Không gắn tag này cho tin phân tích xu hướng, tin tức doanh nghiệp/kinh tế/công nghệ thông thường dù có nhắc tên công ty cụ thể - chỉ gắn khi tin đó chủ yếu quảng bá cho một dự án/sản phẩm/thương hiệu, không mang giá trị tin tức khách quan nào khác.
 - Tiêu đề gốc trên Cafef/Vietstock hay giấu tên cụ thể (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi"). Phần "Nội dung" bên dưới mỗi tin là trích đoạn bài viết gốc - BẮT BUỘC đọc kỹ và nêu rõ tên/mã cụ thể (mã cổ phiếu, tên công ty/ngân hàng, con số, chính sách...) nếu trích đoạn có đề cập, tuyệt đối không lặp lại cách nói chung chung của tiêu đề khi thông tin cụ thể đã có sẵn.
 - Không viết các câu nhận xét sáo rỗng, chung chung, ai cũng tự suy ra được và không bổ sung thông tin mới (vd "đây là động thái đáng chú ý", "ảnh hưởng đến nhà đầu tư", "là thông tin quan trọng với thị trường"). Mỗi câu trong tóm tắt phải mang một dữ kiện/số liệu/sự kiện cụ thể.
-- Mỗi đoạn BẮT BUỘC viết theo đúng định dạng: N) TIÊU ĐỀ HIỂN THỊ|||nội dung tóm tắt. Trong đó:
-  + N là số thứ tự của tin đó trong danh sách dưới đây - đây là cơ chế đối chiếu tự động, đánh sai/bỏ sót số thứ tự sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
-  + TIÊU ĐỀ HIỂN THỊ: nếu tiêu đề gốc của tin đó đã đủ ngắn gọn, rõ nghĩa thì chép lại y nguyên tiêu đề gốc vào đây; nếu tiêu đề gốc quá dài hoặc tối nghĩa/mập mờ kiểu clickbait (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi") thì viết một tiêu đề MỚI ngắn gọn hơn, rõ nghĩa hơn, có chứa từ khóa/tên cụ thể lấy đúng từ nội dung tóm tắt bên dưới - không bịa thông tin ngoài nội dung đã tóm tắt.
-  + "|||" là dấu phân cách bắt buộc, xuất hiện đúng 1 lần trong mỗi đoạn để ngăn cách 2 phần trên.
-- Phần nội dung tóm tắt (sau dấu "|||") mới là đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị làm nội dung cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào.
-- Trả về đúng ${chunk.length} đoạn theo đúng thứ tự danh sách tin bên dưới, mỗi đoạn cách nhau bằng một dòng chỉ chứa duy nhất "${ITEM_DELIMITER}".
+- BẮT BUỘC trả lời bằng đúng một JSON object, không thêm bất kỳ text/markdown/code fence nào khác trước hoặc sau JSON đó. JSON object có field "items" là một mảng, mỗi phần tử là 1 object gồm đúng 3 field:
+  + "index": số thứ tự của tin đó trong danh sách dưới đây (bắt đầu từ 1, đúng theo thứ tự liệt kê) - đây là cơ chế đối chiếu tự động, đánh sai/bỏ sót số thứ tự sẽ khiến toàn bộ kết quả bị huỷ và phải làm lại.
+  + "title": nếu tiêu đề gốc của tin đó đã đủ ngắn gọn, rõ nghĩa thì chép lại y nguyên; nếu tiêu đề gốc quá dài hoặc tối nghĩa/mập mờ kiểu clickbait (vd "một cổ phiếu", "một ngân hàng", "2 thay đổi") thì viết một tiêu đề MỚI ngắn gọn hơn, rõ nghĩa hơn, có chứa từ khóa/tên cụ thể lấy đúng từ nội dung tóm tắt - không bịa thông tin ngoài nội dung đã tóm tắt.
+  + "summary": đoạn văn tóm tắt thực sự, đây là phần duy nhất được hiển thị làm nội dung cho người đọc - không lặp lại tiêu đề trong phần này, không thêm gạch đầu dòng, không thêm link, không thêm lời dẫn/lời kết/ghi chú nào khác, tuyệt đối không nhắc lại hay diễn giải lại các tiêu chí/yêu cầu ở trên dưới bất kỳ hình thức nào. Nếu tin thuộc diện PR/Native Ads, chữ "(PR/Native Ads)" PHẢI nằm ở đầu chuỗi text của field "summary" này - tuyệt đối không được tạo thêm field JSON mới tên "(PR/Native Ads)" hay bất kỳ tên nào khác ngoài đúng 3 field index/title/summary.
+- Mảng "items" phải có đúng ${chunk.length} phần tử, index chạy từ 1 đến ${chunk.length} không thiếu không lặp. Mỗi object CHỈ được có đúng 3 field: index, title, summary - không thêm field nào khác.
 
 Chunk ${chunkIndex + 1}/${chunkCount} của mục này.
 
@@ -126,6 +121,40 @@ ${chunk
   .map((item, index) => `${index + 1}. ${item.title}${item.description ? `\n   Nội dung: ${item.description}` : ''}`)
   .join('\n')}`;
 }
+
+// Plain "json_object" mode only guarantees syntactically-valid JSON, not
+// adherence to our 3-field shape - Qwen occasionally dropped the "title"/
+// "summary" keys entirely on a PR/Native-Ads item (writing the summary text
+// straight as a bogus property name instead), corrupting the whole chunk's
+// JSON. A strict json_schema forces the model to fill in real index/title/
+// summary keys via constrained decoding, which eliminates that failure mode.
+const RESPONSE_SCHEMA = {
+  type: 'json_schema' as const,
+  json_schema: {
+    name: 'summaries',
+    strict: true,
+    schema: {
+      type: 'object',
+      properties: {
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              index: { type: 'integer' },
+              title: { type: 'string' },
+              summary: { type: 'string' },
+            },
+            required: ['index', 'title', 'summary'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['items'],
+      additionalProperties: false,
+    },
+  },
+};
 
 // OpenRouter exposes an OpenAI-compatible /chat/completions endpoint, which
 // is how Qwen (and any other OpenRouter-hosted model) gets called here -
@@ -142,6 +171,7 @@ async function callQwen(apiKey: string, prompt: string): Promise<string> {
       model: process.env.QWEN_MODEL || 'qwen/qwen-plus',
       max_tokens: MAX_TOKENS,
       temperature: 0,
+      response_format: RESPONSE_SCHEMA,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
@@ -171,80 +201,56 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// A chunk that succeeds on the first try needs none of this - retries only
-// kick in once summarizeChunkOnce actually fails (rate limit, timeout,
-// occasional mismatched delimiter count). Promise.all fires every chunk/group
-// at once, so a single dropped request shouldn't permanently demote a whole
-// mục to the non-AI fallback.
-const TITLE_SEPARATOR = '|||';
-
-// A plain item-count check can't catch a model that garbles a single item
-// while still producing the right number of @@@-delimited parts overall -
-// e.g. inserting a stray meta-commentary sentence (restating the
-// instructions) instead of real content for one item. Requiring a
-// sequential index prefix on every item turns that into a detectable
-// failure instead of silently shipping garbled text under a real title.
-//
-// An earlier version also required the model to echo the *exact* original
-// title back for comparison, to additionally guard against a (never
-// actually observed) case where the index numbering is correct but the
-// wrong article's content gets attached anyway. That extra check made
-// summarization noticeably slower - it doubled the title text in the
-// output and, worse, exact-string comparison is fragile (quote style,
-// whitespace, NFC vs NFD Vietnamese diacritics all render identically but
-// compare unequal), so it kept forcing retries on already-correct
-// responses. Dropped in favor of just the index check, which already
-// catches the failure mode actually seen in production.
-//
-// Kept here, disabled, as a fallback in case the index-only check ever
-// proves insufficient in practice - re-enable by restoring the
-// "N) TIÊU ĐỀ GỐC|||TIÊU ĐỀ HIỂN THỊ|||nội dung" format in buildPrompt's
-// format bullet, then swapping parseNumberedSummary's call site below for
-// parseTitledSummary(rawParts[index], index + 1, chunk[index].title).
-//
-// function normalizeForCompare(text: string): string {
-//   return text.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
-// }
-//
-// function parseTitledSummary(part: string, expectedIndex: number, expectedTitle: string): ParsedItem | null {
-//   const indexMatch = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
-//   if (!indexMatch) return null;
-//   const rest = part.slice(indexMatch[0].length);
-//
-//   const firstSeparator = rest.indexOf(TITLE_SEPARATOR);
-//   if (firstSeparator === -1) return null;
-//   const echoedTitle = rest.slice(0, firstSeparator);
-//   if (normalizeForCompare(echoedTitle) !== normalizeForCompare(expectedTitle)) return null;
-//
-//   const afterEcho = rest.slice(firstSeparator + TITLE_SEPARATOR.length);
-//   const secondSeparator = afterEcho.indexOf(TITLE_SEPARATOR);
-//   if (secondSeparator === -1) return null;
-//   const displayTitle = afterEcho.slice(0, secondSeparator).trim();
-//   const summary = afterEcho.slice(secondSeparator + TITLE_SEPARATOR.length).trim();
-//   if (!displayTitle || !summary) return null;
-//
-//   return { displayTitle, summary };
-// }
 interface ParsedItem {
   displayTitle: string;
   summary: string;
 }
 
-// Splits "N) TIÊU ĐỀ HIỂN THỊ|||nội dung" into the index-validated display
-// title (may equal the original) and the summary body, or null if the
-// index prefix or separator is missing/malformed.
-function parseNumberedSummary(part: string, expectedIndex: number): ParsedItem | null {
-  const indexMatch = part.match(new RegExp(`^\\s*${expectedIndex}[).]\\s*`));
-  if (!indexMatch) return null;
-  const rest = part.slice(indexMatch[0].length);
+// Parses the "{"items": [{index, title, summary}, ...]}" JSON object the
+// model is asked to return. Structured JSON output turned out far more
+// reliable than the earlier hand-rolled "N) title|||summary" + "@@@"
+// delimiter format this file used to use - that format would frequently
+// miscount items or malform the delimiter across a 15-item chunk, whereas
+// JSON mode gets the item count and structure right almost every time.
+// Returns null (triggering a retry) on anything short of a fully
+// well-formed response - a partially-parsed chunk risks a summary getting
+// attributed to the wrong article.
+function parseJsonResponse(raw: string, group: { source: string; category: string }, expectedCount: number): ParsedItem[] | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    console.error('qwen json parse failed', { source: group.source, category: group.category, preview: raw.slice(0, 200) });
+    return null;
+  }
 
-  const separator = rest.indexOf(TITLE_SEPARATOR);
-  if (separator === -1) return null;
-  const displayTitle = rest.slice(0, separator).trim();
-  const summary = rest.slice(separator + TITLE_SEPARATOR.length).trim();
-  if (!displayTitle || !summary) return null;
+  const items = (parsed as { items?: unknown })?.items;
+  if (!Array.isArray(items) || items.length !== expectedCount) {
+    console.error('qwen summary count mismatch', {
+      source: group.source,
+      category: group.category,
+      expected: expectedCount,
+      got: Array.isArray(items) ? items.length : typeof items,
+    });
+    return null;
+  }
 
-  return { displayTitle, summary };
+  const result: ParsedItem[] = [];
+  for (let index = 0; index < items.length; index++) {
+    const entry = items[index] as { index?: number; title?: string; summary?: string };
+    if (entry?.index !== index + 1 || !entry.title || !entry.summary) {
+      console.error('qwen summary entry invalid', {
+        source: group.source,
+        category: group.category,
+        expectedIndex: index + 1,
+        entry,
+      });
+      return null;
+    }
+    result.push({ displayTitle: entry.title, summary: normalizeSummaryPunctuation(entry.summary) });
+  }
+
+  return result;
 }
 
 async function summarizeChunkOnce(
@@ -257,37 +263,7 @@ async function summarizeChunkOnce(
 ): Promise<ParsedItem[] | null> {
   try {
     const raw = await callQwen(apiKey, buildPrompt(group, chunk, chunkIndex, chunkCount, hours));
-    const rawParts = raw
-      .split(ITEM_DELIMITER)
-      .map((part) => part.trim())
-      .filter(Boolean);
-
-    if (rawParts.length !== chunk.length) {
-      console.error('qwen summary count mismatch', {
-        source: group.source,
-        category: group.category,
-        expected: chunk.length,
-        got: rawParts.length,
-      });
-      return null;
-    }
-
-    const parts: ParsedItem[] = [];
-    for (let index = 0; index < rawParts.length; index++) {
-      const parsed = parseNumberedSummary(rawParts[index], index + 1);
-      if (parsed === null) {
-        console.error('qwen summary index mismatch', {
-          source: group.source,
-          category: group.category,
-          expectedIndex: index + 1,
-          gotPreview: rawParts[index].slice(0, 120),
-        });
-        return null;
-      }
-      parts.push({ displayTitle: parsed.displayTitle, summary: normalizeSummaryPunctuation(parsed.summary) });
-    }
-
-    return parts;
+    return parseJsonResponse(raw, group, chunk.length);
   } catch (error) {
     console.error('qwen chunk error', group.source, group.category, error);
     return null;
